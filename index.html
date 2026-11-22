@@ -1,0 +1,3507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>MiroFish — Del Cero a la Simulación Profesional by Rubén Sbarsky</title>
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #0f172a;
+  --surface-alt: #162038;
+  --border: #1e3a5f;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.22);
+  --secondary: #a855f7;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --code-bg: #050811;
+  --font-size: 16px;
+}
+
+body.light-theme {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface-alt: #e2e8f0;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --accent: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.15);
+  --secondary: #7e22ce;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --code-bg: #1e293b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--font-size);
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  line-height: 1.65;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-top: 112px;
+  padding-bottom: 84px;
+}
+
+/* Barra de progreso superior */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--secondary));
+  z-index: 60;
+  transition: width 0.1s linear;
+}
+
+/* Cabecera fija optimizada para 360px (Samsung Galaxy A02s) */
+header.top-bar {
+  position: fixed;
+  top: 3px;
+  left: 0;
+  right: 0;
+  background: rgba(10, 14, 26, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  z-index: 40;
+}
+
+body.light-theme header.top-bar {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.utility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  min-height: 50px;
+}
+
+.brand-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.brand-compact span {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-util {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 36px;
+  min-width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-util:hover, .btn-util:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  outline: none;
+}
+
+/* Barra de pestañas */
+nav.tab-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+nav.tab-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+nav.tab-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.chip {
+  flex-shrink: 0;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.chip:hover, .chip:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent-glow);
+}
+
+.chip.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Panel lateral Índice (#dr) */
+#dr {
+  position: fixed;
+  top: 109px;
+  left: 0;
+  bottom: 0;
+  width: min(330px, 88vw);
+  background: #0f172a;
+  border-right: 1px solid #1e3a5f;
+  transform: translateX(-105%);
+  transition: transform 0.25s ease;
+  z-index: 45;
+  overflow-y: auto;
+  padding: 12px;
+  box-shadow: 6px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+#dr.o {
+  transform: translateX(0);
+}
+
+#dr a {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  color: #e2e8f0;
+  cursor: pointer;
+  min-height: 44px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+#dr a:hover, #dr a:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+#dr a.on {
+  background: rgba(0, 212, 255, 0.16);
+  color: #38bdf8;
+  font-weight: 700;
+  border-left: 3px solid #38bdf8;
+}
+
+/* Buscador desplegable */
+#search-bar-panel {
+  display: none;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px;
+}
+
+#search-bar-panel.open {
+  display: block;
+}
+
+.search-input-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+}
+
+#search-input {
+  flex: 1;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  min-height: 44px;
+}
+
+#search-results {
+  max-width: 900px;
+  margin: 8px auto 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.search-hit {
+  padding: 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.search-hit:hover {
+  border-color: var(--accent);
+}
+
+/* Contenedor principal */
+main.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+section.tab-panel {
+  display: none;
+  animation: fadeIn 0.25s ease;
+}
+
+section.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero Title con Logo integrado */
+.hero-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.hero-logo-box {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  background: #060b19;
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+h1.main-title {
+  font-size: clamp(1.35rem, 4.5vw, 2.05rem);
+  line-height: 1.25;
+  color: var(--text);
+  font-weight: 800;
+  flex: 1;
+  min-width: 220px;
+}
+
+h1.main-title .author-tag {
+  display: inline-block;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+h2.section-title {
+  font-size: clamp(1.3rem, 4vw, 1.75rem);
+  color: var(--accent);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.18rem;
+  color: var(--text);
+  margin: 20px 0 10px;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.02rem;
+  color: var(--accent);
+  margin: 14px 0 6px;
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 12px;
+}
+
+ul, ol {
+  margin: 0 0 14px 20px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* Contenedor SVG Hero Animado (4:5 vertical adaptado y centrado) */
+.svg-stage-wrapper {
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4 / 5;
+  margin: 16px auto;
+  background: radial-gradient(circle at center, #111d38 0%, #060913 100%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.svg-stage-wrapper svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.svg-caption {
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  font-style: italic;
+}
+
+/* Tarjetas y bloques */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+.card-highlight {
+  border-left: 4px solid var(--accent);
+}
+
+.card-warning {
+  border-left: 4px solid var(--warning);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.card-danger {
+  border-left: 4px solid var(--danger);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.card-success {
+  border-left: 4px solid var(--success);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.badge-confirmed { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+.badge-rec { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid #38bdf8; }
+.badge-warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+/* Bloques de código y prompts copiables */
+.code-block-wrap {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 12px 0 16px;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: rgba(30, 58, 95, 0.45);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.btn-copy {
+  background: var(--accent);
+  color: #04101d;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 34px;
+  transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn-copy:active {
+  transform: scale(0.96);
+}
+
+pre.code-content {
+  padding: 12px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+code.inline-code {
+  background: rgba(56, 189, 248, 0.14);
+  color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.88em;
+}
+
+/* Enlaces externos con botón obligatorio "Abrir enlace en nueva ventana" */
+.url-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+@media (min-width: 640px) {
+  .url-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.url-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.url-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.url-raw {
+  font-size: 0.8rem;
+  color: var(--accent);
+  word-break: break-all;
+  font-family: monospace;
+  margin: 2px 0;
+}
+
+.url-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.url-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.btn-link-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #0284c7;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  min-height: 40px;
+  border: 1px solid #38bdf8;
+  transition: background 0.2s;
+}
+
+.btn-link-new:hover {
+  background: #0369a1;
+}
+
+/* Tablas responsivas */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 14px 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  font-size: 0.9rem;
+}
+
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+th {
+  background: var(--surface-alt);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Checklists persistentes */
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.checklist-item.checked span {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Acordeones (Q&A y desplegables) */
+.qa-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.btn-qa-toggle {
+  background: var(--surface-alt);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-qa-toggle:hover {
+  background: var(--accent-glow);
+}
+
+details.qa-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+details.qa-item summary {
+  padding: 13px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 48px;
+  color: var(--text);
+}
+
+details.qa-item summary::-webkit-details-marker {
+  display: none;
+}
+
+details.qa-item summary::after {
+  content: "+";
+  font-size: 1.3rem;
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+details.qa-item[open] summary::after {
+  content: "−";
+}
+
+details.qa-item[open] summary {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-alt);
+  color: var(--accent);
+}
+
+.qa-answer {
+  padding: 14px;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+/* Navegación fija al final de cada pestaña */
+.tab-footer-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn-nav-step {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.btn-nav-step:hover {
+  background: var(--accent-glow);
+}
+
+.btn-nav-step.next {
+  margin-left: auto;
+  background: var(--accent);
+  color: #051120;
+}
+
+/* Botones flotantes arrastrables (INICIO y ARRIBA) */
+.floating-draggable {
+  position: fixed;
+  z-index: 50;
+  background: #0f172a;
+  color: #38bdf8;
+  border: 2px solid #38bdf8;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.floating-draggable:active {
+  cursor: grabbing;
+  transform: scale(0.97);
+}
+
+#float-home {
+  bottom: 72px;
+  right: 12px;
+}
+
+#float-top {
+  bottom: 18px;
+  right: 12px;
+}
+
+/* Toast de notificaciones */
+#toast-msg {
+  position: fixed;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: #03150e;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  z-index: 70;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 90vw;
+}
+
+#toast-msg.show {
+  opacity: 1;
+}
+
+/* Diagrama de flujo visual */
+.flow-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.flow-step {
+  background: var(--surface-alt);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.flow-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #04101d;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Créditos destacados */
+.author-spotlight {
+  text-align: center;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(168, 85, 247, 0.14));
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  margin: 16px 0;
+}
+
+.author-name-hero {
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+/* Animaciones SVG multicapa */
+@keyframes pulseCore {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes orbitSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbitReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes flowDash {
+  to { stroke-dashoffset: -48; }
+}
+
+@keyframes floatNode {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes signalPing {
+  0% { r: 6; opacity: 0.9; }
+  100% { r: 26; opacity: 0; }
+}
+
+.svg-core-pulse { transform-origin: 200px 250px; animation: pulseCore 3.5s ease-in-out infinite; }
+.svg-orbit-1 { transform-origin: 200px 250px; animation: orbitSlow 28s linear infinite; }
+.svg-orbit-2 { transform-origin: 200px 250px; animation: orbitReverse 22s linear infinite; }
+.svg-data-stream { stroke-dasharray: 8 8; animation: flowDash 1.8s linear infinite; }
+.svg-node-float-a { animation: floatNode 4s ease-in-out infinite; }
+.svg-node-float-b { animation: floatNode 4.8s ease-in-out infinite 0.8s; }
+.svg-ping { animation: signalPing 2.6s ease-out infinite; }
+
+body.svg-paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svg-core-pulse, .svg-orbit-1, .svg-orbit-2, .svg-data-stream, .svg-node-float-a, .svg-node-float-b, .svg-ping {
+    animation: none !important;
+  }
+}
+
+/* Estilos de Impresión A4 Vertical */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 12mm;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    font-size: 11pt !important;
+  }
+  header.top-bar, #dr, #search-bar-panel, .floating-draggable, .tab-footer-nav, .btn-copy, .qa-controls, #toast-msg, #reading-progress {
+    display: none !important;
+  }
+  section.tab-panel {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 16px;
+  }
+  .card, .url-card, .code-block-wrap, details.qa-item, .flow-step, .checklist-item {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #666666 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  pre.code-content {
+    background: #f8fafc !important;
+    color: #000000 !important;
+    white-space: pre-wrap !important;
+  }
+  .author-name-hero {
+    background: none !important;
+    -webkit-text-fill-color: #000000 !important;
+    color: #000000 !important;
+  }
+  .svg-stage-wrapper {
+    background: #0a0e1a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="reading-progress" aria-hidden="true"></div>
+
+<!-- PLANTILLA ÚNICA DEL LOGOTIPO VECTORIAL (Basado en logo tutoriales IA.jpeg) -->
+<template id="tpl-brand-logo">
+  <svg viewBox="0 0 120 120" width="100%" height="100%" role="img" aria-label="Logotipo Tutoriales IA">
+    <defs>
+      <linearGradient id="logoGradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="55%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#a855f7"/>
+      </linearGradient>
+    </defs>
+    <!-- Escudo tecnológico -->
+    <path d="M60 8 C35 8 16 18 16 26 C16 64 32 92 60 106 C88 92 104 64 104 26 C104 18 85 8 60 8 Z" fill="#071124" stroke="url(#logoGradMain)" stroke-width="4.5"/>
+    <!-- Hemisferio izquierdo cerebral -->
+    <path d="M56 30 C44 30 36 38 36 48 C33 51 33 58 37 62 C36 69 43 76 52 76 L56 76 Z" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+    <path d="M44 43 C48 43 50 47 46 50 M42 58 C47 58 50 62 46 66" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Hemisferio derecho circuito IA -->
+    <path d="M64 30 L74 30 L82 38 L82 66 L74 76 L64 76" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="76" cy="42" r="3" fill="#38bdf8"/>
+    <circle cx="84" cy="53" r="3" fill="#a855f7"/>
+    <circle cx="76" cy="64" r="3" fill="#38bdf8"/>
+    <line x1="64" y1="42" x2="76" y2="42" stroke="#38bdf8" stroke-width="2"/>
+    <line x1="64" y1="53" x2="84" y2="53" stroke="#a855f7" stroke-width="2"/>
+    <line x1="64" y1="64" x2="76" y2="64" stroke="#38bdf8" stroke-width="2"/>
+    <!-- Botón central Play -->
+    <circle cx="60" cy="53" r="12" fill="#0a0e1a" stroke="#38bdf8" stroke-width="2.5"/>
+    <polygon points="57,47 67,53 57,59" fill="#38bdf8"/>
+    <!-- Siglas IA -->
+    <text x="60" y="96" text-anchor="middle" fill="#38bdf8" font-family="sans-serif" font-weight="900" font-size="16" letter-spacing="1">IA</text>
+  </svg>
+</template>
+
+<!-- PLANTILLA ÚNICA SVG HERO ANIMADO (4:5 - Enjambre Multiagente, Grafo Zep y OASIS) -->
+<template id="tpl-hero-svg">
+  <svg viewBox="0 0 400 500" width="100%" height="100%" role="img" aria-label="Ilustración animada del ecosistema multiagente MiroFish: red neuronal en grafo de conocimiento Zep, agentes sociales interactuando en plataformas simuladas OASIS y síntesis de informes.">
+    <defs>
+      <radialGradient id="g-bg-core" cx="50%" cy="50%" r="55%">
+        <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+        <stop offset="55%" stop-color="#1e3a5f" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#0a0e1a" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="g-ring-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="100%" stop-color="#a855f7"/>
+      </linearGradient>
+      <linearGradient id="g-node-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981"/>
+        <stop offset="100%" stop-color="#38bdf8"/>
+      </linearGradient>
+      <filter id="g-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Capa 1: Fondo profundo y retícula de simulación -->
+    <rect width="400" height="500" fill="#070c18"/>
+    <circle cx="200" cy="250" r="195" fill="url(#g-bg-core)"/>
+    <g stroke="#1e3a5f" stroke-width="0.7" opacity="0.35">
+      <line x1="0" y1="100" x2="400" y2="100"/>
+      <line x1="0" y1="250" x2="400" y2="250"/>
+      <line x1="0" y1="400" x2="400" y2="400"/>
+      <line x1="100" y1="0" x2="100" y2="500"/>
+      <line x1="200" y1="0" x2="200" y2="500"/>
+      <line x1="300" y1="0" x2="300" y2="500"/>
+    </g>
+
+    <!-- Capa 2: Órbitas de plataformas sociales simuladas (Twitter / Reddit OASIS) -->
+    <g class="svg-orbit-1">
+      <circle cx="200" cy="250" r="158" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="10 8" opacity="0.5"/>
+      <circle cx="200" cy="92" r="7" fill="#38bdf8" filter="url(#g-glow)"/>
+      <circle cx="200" cy="408" r="7" fill="#a855f7" filter="url(#g-glow)"/>
+      <circle cx="42" cy="250" r="6" fill="#10b981"/>
+      <circle cx="358" cy="250" r="6" fill="#f59e0b"/>
+    </g>
+
+    <g class="svg-orbit-2">
+      <circle cx="200" cy="250" r="115" fill="none" stroke="#a855f7" stroke-width="1.4" stroke-dasharray="4 10" opacity="0.65"/>
+      <polygon points="200,130 206,141 194,141" fill="#38bdf8"/>
+      <polygon points="200,370 206,359 194,359" fill="#a855f7"/>
+    </g>
+
+    <!-- Capa 3: Flujos de datos GraphRAG entre nodos de agentes -->
+    <g fill="none" stroke-width="2" filter="url(#g-glow)">
+      <path d="M 85 155 Q 140 200 200 250" stroke="#38bdf8" class="svg-data-stream"/>
+      <path d="M 315 155 Q 260 200 200 250" stroke="#a855f7" class="svg-data-stream"/>
+      <path d="M 85 345 Q 140 300 200 250" stroke="#10b981" class="svg-data-stream"/>
+      <path d="M 315 345 Q 260 300 200 250" stroke="#f59e0b" class="svg-data-stream"/>
+      <line x1="85" y1="155" x2="315" y2="155" stroke="#38bdf8" stroke-opacity="0.4" class="svg-data-stream"/>
+      <line x1="85" y1="345" x2="315" y2="345" stroke="#a855f7" stroke-opacity="0.4" class="svg-data-stream"/>
+      <line x1="85" y1="155" x2="85" y2="345" stroke="#10b981" stroke-opacity="0.4" class="svg-data-stream"/>
+      <line x1="315" y1="155" x2="315" y2="345" stroke="#f59e0b" stroke-opacity="0.4" class="svg-data-stream"/>
+    </g>
+
+    <!-- Capa 4: Núcleo Central Zep Knowledge Graph + ReportAgent -->
+    <g class="svg-core-pulse">
+      <circle cx="200" cy="250" r="46" fill="#0f172a" stroke="url(#g-ring-cyan)" stroke-width="3" filter="url(#g-glow)"/>
+      <circle cx="200" cy="250" r="34" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.6"/>
+      <circle cx="200" cy="250" r="12" fill="none" stroke="#38bdf8" stroke-width="2" class="svg-ping"/>
+      <!-- Icono Pez / Enjambre estilizado MiroFish -->
+      <path d="M180 250 C190 236, 210 236, 222 250 C210 264, 190 264, 180 250 Z" fill="url(#g-node-emerald)" opacity="0.9"/>
+      <polygon points="182,250 171,241 171,259" fill="#38bdf8"/>
+      <circle cx="211" cy="247" r="2.5" fill="#0a0e1a"/>
+    </g>
+
+    <!-- Capa 5: Cuatro Agentes Sociales Autónomos (Personas OASIS) -->
+    <!-- Agente 1: Documento Semilla -->
+    <g class="svg-node-float-a">
+      <rect x="52" y="125" width="66" height="54" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="85" cy="144" r="8" fill="#38bdf8"/>
+      <path d="M72 166 C72 158, 98 158, 98 166" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="85" y="193" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="10" font-weight="700">SEMILLA</text>
+    </g>
+
+    <!-- Agente 2: Perfil Social A -->
+    <g class="svg-node-float-b">
+      <rect x="282" y="125" width="66" height="54" rx="12" fill="#0f172a" stroke="#a855f7" stroke-width="2"/>
+      <circle cx="315" cy="144" r="8" fill="#a855f7"/>
+      <path d="M302 166 C302 158, 328 158, 328 166" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="315" y="193" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="10" font-weight="700">AGENTE X</text>
+    </g>
+
+    <!-- Agente 3: Perfil Social B -->
+    <g class="svg-node-float-b">
+      <rect x="52" y="318" width="66" height="54" rx="12" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+      <circle cx="85" cy="337" r="8" fill="#10b981"/>
+      <path d="M72 359 C72 351, 98 351, 98 359" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="85" y="386" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="10" font-weight="700">AGENTE R</text>
+    </g>
+
+    <!-- Agente 4: ReportAgent -->
+    <g class="svg-node-float-a">
+      <rect x="282" y="318" width="66" height="54" rx="12" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+      <rect x="304" y="330" width="22" height="28" rx="3" fill="none" stroke="#f59e0b" stroke-width="2"/>
+      <line x1="309" y1="338" x2="321" y2="338" stroke="#f59e0b" stroke-width="2"/>
+      <line x1="309" y1="345" x2="321" y2="345" stroke="#f59e0b" stroke-width="2"/>
+      <text x="315" y="386" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="10" font-weight="700">INFORME</text>
+    </g>
+
+    <!-- Etiquetas superior e inferior del ecosistema -->
+    <rect x="65" y="24" width="270" height="30" rx="15" fill="#0f172a" stroke="#1e3a5f" stroke-width="1.5"/>
+    <text x="200" y="43" text-anchor="middle" fill="#38bdf8" font-family="sans-serif" font-size="12" font-weight="800" letter-spacing="1.2">MIROFISH • SWARM INTELLIGENCE</text>
+
+    <rect x="55" y="446" width="290" height="30" rx="15" fill="#0f172a" stroke="#1e3a5f" stroke-width="1.5"/>
+    <text x="200" y="465" text-anchor="middle" fill="#e2e8f0" font-family="sans-serif" font-size="11" font-weight="700">ZEP GRAPHRAG + OASIS MULTI-AGENT</text>
+  </svg>
+</template>
+
+<!-- CABECERA FIJA -->
+<header class="top-bar">
+  <div class="utility-row">
+    <div class="brand-compact">
+      <div id="nav-logo-slot" style="width:34px;height:34px;flex-shrink:0;"></div>
+      <span>MiroFish Guía</span>
+    </div>
+    <div class="controls-group">
+      <button class="btn-util" id="btn-toggle-search" aria-label="Buscar en el tutorial" title="Buscar">🔍</button>
+      <button class="btn-util" id="btn-font-dec" aria-label="Reducir tamaño de texto" title="Reducir letra">A-</button>
+      <button class="btn-util" id="btn-font-inc" aria-label="Aumentar tamaño de texto" title="Aumentar letra">A+</button>
+      <button class="btn-util" id="btn-theme-toggle" aria-label="Cambiar tema claro u oscuro" title="Cambiar tema">🌓</button>
+      <button class="btn-util" id="btn-print-pdf" aria-label="Imprimir o guardar como PDF" title="Imprimir / PDF">🖨️</button>
+    </div>
+  </div>
+
+  <!-- BARRA DE PESTAÑAS -->
+  <nav class="tab-nav" id="main-tab-nav" aria-label="Secciones del tutorial">
+    <button class="chip" id="mb" aria-label="Abrir índice" aria-expanded="false">☰ Índice</button>
+    <button class="chip active" data-tab="0">Inicio</button>
+    <button class="chip" data-tab="1">Arquitectura</button>
+    <button class="chip" data-tab="2">Requisitos</button>
+    <button class="chip" data-tab="3">Instalación Win11</button>
+    <button class="chip" data-tab="4">Docker</button>
+    <button class="chip" data-tab="5">Primera Simulación</button>
+    <button class="chip" data-tab="6">Diseño Avanzado</button>
+    <button class="chip" data-tab="7">Seguridad y Costes</button>
+    <button class="chip" data-tab="8">33 Preguntas (Q&amp;A)</button>
+    <button class="chip" data-tab="9">ERRORES</button>
+    <button class="chip" data-tab="10">PROMPTS</button>
+    <button class="chip" data-tab="11">10 Casos Prácticos</button>
+    <button class="chip" data-tab="12">10 Proyectos</button>
+    <button class="chip" data-tab="13">Glosario</button>
+    <button class="chip" data-tab="14">Checklist</button>
+    <button class="chip" data-tab="15">FUENTES</button>
+    <button class="chip" data-tab="16">CRÉDITOS</button>
+  </nav>
+
+  <!-- PANEL DE BÚSQUEDA -->
+  <div id="search-bar-panel">
+    <div class="search-input-wrap">
+      <input type="search" id="search-input" placeholder="Buscar comandos, errores, Zep, OASIS, Python..." aria-label="Término de búsqueda">
+      <button class="btn-util" id="btn-close-search" aria-label="Cerrar búsqueda">✕</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</header>
+
+<!-- PANEL LATERAL ÍNDICE (#dr) -->
+<div id="dr" role="navigation" aria-label="Índice completo de secciones"></div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<main class="container" id="main-content">
+
+  <!-- ==================== PESTAÑA 0: INICIO ==================== -->
+  <section class="tab-panel active" data-t="Inicio" id="sec-0">
+    <div class="hero-header">
+      <div class="hero-logo-box" id="hero-logo-slot"></div>
+      <h1 class="main-title">MIROFISH — DEL CERO A LA SIMULACIÓN PROFESIONAL <span class="author-tag">by Rubén Sbarsky</span></h1>
+    </div>
+
+    <div class="card card-highlight">
+      <p><strong>Tutorial autodidacta para personas no técnicas en Windows 11</strong></p>
+      <p><strong>Autor:</strong> Rubén Sbarsky &nbsp;|&nbsp; <strong>Elaboración:</strong> 22/11/2026 &nbsp;|&nbsp; <strong>Verificación técnica:</strong> 22/11/2026 (repositorio <code class="inline-code">main</code> consultado ese día)</p>
+      <p style="margin-bottom:0;"><em>MiroFish permite explorar escenarios mediante agentes de inteligencia artificial que interactúan dentro de entornos sociales simulados. Este curso enseña a instalarlo, entenderlo y utilizarlo con criterio. Una simulación no es una predicción garantizada ni sustituye datos reales.</em></p>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="btn-qa-toggle" id="ix">☰ Ver índice completo</button>
+      <button class="btn-util" id="btn-pause-hero" style="padding:10px 14px;">⏯ Pausar / Reanudar animación</button>
+    </div>
+
+    <!-- CONTENEDOR SVG HERO ANIMADO -->
+    <div class="svg-stage-wrapper" id="hero-svg-container"></div>
+    <p class="svg-caption">Representación dinámica del ecosistema MiroFish: documentos semilla transformados en grafo Zep GraphRAG, simulación social multiagente OASIS y síntesis de informe.</p>
+
+    <div class="card">
+      <h3>Nota de verificación y alcance</h3>
+      <p>Se han contrastado el <code class="inline-code">README.md</code>, <code class="inline-code">package.json</code>, <code class="inline-code">.env.example</code>, <code class="inline-code">.gitignore</code>, <code class="inline-code">backend/pyproject.toml</code>, <code class="inline-code">backend/app/config.py</code>, <code class="inline-code">backend/run.py</code>, servicios de construcción de grafos, simulación y generación de informes, y componentes de la interfaz del repositorio oficial. La rama <code class="inline-code">main</code> puede cambiar después de esta fecha. Antes de instalar en una fecha posterior, vuelve a comparar los archivos enlazados.</p>
+      <p><span class="badge badge-confirmed">Hecho confirmado</span> significa que aparece en el repositorio o en documentación oficial consultada.</p>
+      <p><span class="badge badge-rec">Recomendación</span> significa una práctica prudente para un principiante.</p>
+      <p style="margin-bottom:0;"><span class="badge badge-warn">No confirmado</span> indica que el dato no debe darse por supuesto: compruébalo en la versión que hayas descargado.</p>
+    </div>
+
+    <div class="card">
+      <h3>1. ¿Qué es MiroFish?</h3>
+      <p>MiroFish es un proyecto de código abierto que construye un mundo social simulado a partir de información de partida y utiliza agentes basados en modelos de lenguaje para interactuar dentro de ese mundo. Su repositorio lo presenta como un motor de simulación e inteligencia de enjambre.</p>
+      <p>Imagina que quieres estudiar cómo podrían reaccionar distintos grupos ante una propuesta municipal. En lugar de preguntar a un único chatbot «¿qué pasaría?», MiroFish intenta construir perfiles de participantes y un entorno donde esos perfiles publican, reaccionan, comentan y se influyen entre sí. Después genera un informe que resume la simulación.</p>
+      <h4>La diferencia es importante:</h4>
+      <ul>
+        <li>Un chatbot convencional produce una respuesta en una conversación.</li>
+        <li>Una simulación multiagente crea varios participantes artificiales con perfiles y comportamientos configurados y observa sus interacciones dentro de unas reglas.</li>
+        <li>El resultado depende de los documentos, los perfiles generados, el modelo, las instrucciones, los parámetros y la implementación.</li>
+      </ul>
+
+      <h4>1.1. Qué problema intenta abordar</h4>
+      <p>Un análisis convencional puede pasar por alto interacciones: una persona publica una opinión, otra la comenta, una tercera cambia de postura, y una conversación se extiende. MiroFish intenta representar parte de esa dinámica en un entorno artificial.</p>
+      <p>El proyecto describe un flujo de cinco grandes etapas:</p>
+      <ol>
+        <li><strong>Graph Building:</strong> extracción de información semilla, memoria individual/colectiva y construcción GraphRAG.</li>
+        <li><strong>Environment Setup:</strong> extracción de relaciones, generación de perfiles y configuración de agentes.</li>
+        <li><strong>Simulation:</strong> simulación paralela en dos plataformas y actualización temporal de memoria.</li>
+        <li><strong>Report Generation:</strong> creación de un informe mediante ReportAgent.</li>
+        <li><strong>Deep Interaction:</strong> conversación posterior con agentes del mundo simulado y con ReportAgent.</li>
+      </ol>
+      <p><em>La descripción del repositorio es una declaración del diseño del proyecto; no demuestra que una simulación reproduzca fielmente una sociedad real.</em></p>
+
+      <h4>1.2. Conceptos fundamentales</h4>
+      <ul>
+        <li><strong>Inteligencia de enjambre:</strong> comportamiento colectivo que aparece cuando muchos individuos interactúan siguiendo reglas locales. Una bandada de pájaros no necesita un director que decida cada movimiento. En MiroFish, los individuos son agentes de IA y las reglas son las del entorno simulado.</li>
+        <li><strong>Simulación basada en agentes:</strong> método que representa un sistema mediante unidades individuales —agentes— que toman decisiones e interactúan. El resultado global puede surgir de la suma de esas interacciones.</li>
+        <li><strong>Agente de IA:</strong> entidad de software que recibe contexto, utiliza un modelo de lenguaje y puede elegir acciones dentro de un conjunto permitido. No es una persona ni posee necesariamente conciencia, deseos o comprensión humana.</li>
+        <li><strong>Mundo simulado:</strong> entorno artificial donde los agentes actúan. En MiroFish, OASIS proporciona la base para simular plataformas sociales.</li>
+      </ul>
+
+      <h4>1.3. Qué recibe y qué produce</h4>
+      <p>La configuración actual admite documentos PDF, Markdown (<code class="inline-code">.md</code>, <code class="inline-code">.markdown</code>) y texto plano (<code class="inline-code">.txt</code>). El backend define un límite de carga de 50 MB. No interpretes ese límite como recomendación de subir documentos enormes: un documento grande puede aumentar procesamiento, complejidad y costes.</p>
+      <p><strong>Entradas habituales:</strong></p>
+      <ul>
+        <li>Uno o varios documentos que aporten contexto.</li>
+        <li>Una descripción en lenguaje natural de lo que se quiere explorar.</li>
+        <li>Credenciales para el proveedor LLM y Zep Cloud.</li>
+      </ul>
+      <p><strong>Salidas posibles según el flujo de la aplicación:</strong></p>
+      <ul>
+        <li>Un grafo de conocimiento con entidades y relaciones.</li>
+        <li>Perfiles de agentes.</li>
+        <li>Una simulación social en plataformas tipo Twitter y Reddit.</li>
+        <li>Estados, acciones y registros de simulación.</li>
+        <li>Un informe generado por ReportAgent.</li>
+        <li>Interacción posterior con agentes e informe.</li>
+      </ul>
+
+      <h4>1.4. Casos apropiados y casos inadecuados</h4>
+      <div class="card card-success">
+        <strong>Usos exploratorios razonables:</strong>
+        <ul style="margin-bottom:0;">
+          <li>Comparar posibles reacciones a una propuesta hipotética.</li>
+          <li>Explorar escenarios narrativos o finales alternativos de una novela.</li>
+          <li>Examinar cómo una noticia ficticia podría circular en un entorno simulado.</li>
+          <li>Generar hipótesis que después se contrastarán con entrevistas, encuestas o datos.</li>
+        </ul>
+      </div>
+      <div class="card card-danger">
+        <strong>No lo utilices como autoridad única para:</strong>
+        <ul style="margin-bottom:0;">
+          <li>Diagnosticar, tratar o decidir sobre salud.</li>
+          <li>Decidir inversiones, créditos o compras importantes.</li>
+          <li>Predecir elecciones, conflictos, mercados o comportamientos reales con precisión.</li>
+          <li>Evaluar personas reales para contratarlas, despedirlas o clasificarlas.</li>
+          <li>Sustituir encuestas representativas, experimentos, asesoramiento profesional o investigación.</li>
+        </ul>
+      </div>
+
+      <h4>1.5. Limitaciones esenciales</h4>
+      <ol>
+        <li><strong>Dependencia de la entrada:</strong> si el documento omite voces, hechos o matices, el mundo simulado heredará esas carencias.</li>
+        <li><strong>Sesgo de representación:</strong> los perfiles generados pueden no reflejar la diversidad real.</li>
+        <li><strong>Alucinaciones:</strong> un LLM puede inventar detalles o presentar una conjetura como si fuera un hecho.</li>
+        <li><strong>Sensibilidad a instrucciones:</strong> pequeños cambios de prompt pueden cambiar los resultados.</li>
+        <li><strong>Dependencia del modelo:</strong> distintos proveedores/modelos pueden responder de forma diferente.</li>
+        <li><strong>Falsa precisión:</strong> un gráfico o porcentaje no convierte una simulación en evidencia.</li>
+        <li><strong>Efecto de escala:</strong> muchos agentes no garantizan realismo; pueden multiplicar errores y costes.</li>
+      </ol>
+
+      <h4>1.6. Flujo general de trabajo</h4>
+      <div class="flow-diagram">
+        <div class="flow-step"><div class="flow-num">1</div><div><strong>Documentos y pregunta</strong> → Material de partida y objetivo de exploración.</div></div>
+        <div class="flow-step"><div class="flow-num">2</div><div><strong>Extracción y análisis</strong> → Identificación de entidades y relaciones.</div></div>
+        <div class="flow-step"><div class="flow-num">3</div><div><strong>Grafo de conocimiento en Zep</strong> → Estructuración semántica externa.</div></div>
+        <div class="flow-step"><div class="flow-num">4</div><div><strong>Perfiles de agentes</strong> → Creación de participantes sintéticos.</div></div>
+        <div class="flow-step"><div class="flow-num">5</div><div><strong>Configuración del entorno OASIS</strong> → Preparación de reglas y redes.</div></div>
+        <div class="flow-step"><div class="flow-num">6</div><div><strong>Interacciones simuladas</strong> → Publicaciones, respuestas y evolución temporal.</div></div>
+        <div class="flow-step"><div class="flow-num">7</div><div><strong>Informe de ReportAgent</strong> → Síntesis analítica del proceso.</div></div>
+        <div class="flow-step"><div class="flow-num">8</div><div><strong>Exploración crítica y contraste externo</strong> → Validación humana con datos reales.</div></div>
+      </div>
+      <p style="margin-bottom:0;">En palabras sencillas: aportas material; el sistema organiza conceptos y relaciones; crea participantes artificiales; los hace interactuar en un entorno social simulado; y redacta un informe. El último paso —contrastar el informe con la realidad— sigue siendo responsabilidad del usuario.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step next" onclick="go(1)">Siguiente: Arquitectura Interna →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 1: ARQUITECTURA ==================== -->
+  <section class="tab-panel" data-t="Arquitectura Interna" id="sec-1">
+    <h2 class="section-title">2. Cómo funciona MiroFish por dentro — sin ser ingeniero</h2>
+    <div class="card">
+      <p>Piensa en una pequeña ciudad ficticia. Hay habitantes con perfiles distintos, un archivo de información, lugares donde conversan y un observador que redacta un resumen. Esa analogía ayuda, pero no es literal: MiroFish no crea personas conscientes ni una sociedad completa.</p>
+
+      <h3>2.1. Información semilla</h3>
+      <p>Es el material inicial que orienta la simulación. Puede ser un informe, una noticia, un borrador de política o una historia. El backend extrae texto de los archivos admitidos y lo prepara para procesarlo.</p>
+      <p><strong>Por qué importa:</strong> los agentes no pueden conocer de forma fiable aquello que no está en el contexto disponible o que el modelo no sabe. Una entrada equilibrada y bien delimitada mejora la calidad del experimento.</p>
+
+      <h3>2.2. Extracción de entidades y relaciones</h3>
+      <p>El sistema utiliza componentes de IA para identificar entidades —por ejemplo, organizaciones, personas, lugares o conceptos— y relaciones entre ellas. Una entidad puede ser «biblioteca municipal» y una relación «depende del ayuntamiento».</p>
+      <p><em>No confundas una entidad extraída con una entidad verificada: la extracción automática puede equivocarse.</em></p>
+
+      <h3>2.3. Grafo de conocimiento y Zep</h3>
+      <p>Un grafo representa elementos como nodos y sus conexiones como aristas. Es parecido a un mapa conceptual, pero con estructura que el software puede consultar.</p>
+      <p>El servicio <code class="inline-code">GraphBuilderService</code> del backend utiliza Zep Cloud para crear un grafo independiente, establecer una ontología y enviar fragmentos de texto. El código divide el texto en bloques y gestiona el envío por lotes. La variable obligatoria en la configuración es <code class="inline-code">ZEP_API_KEY</code>.</p>
+      <div class="card card-warning">
+        <p style="margin-bottom:0;"><strong>Zep no es una base de datos local que venga incluida en tu ordenador.</strong> Es un servicio externo. Por tanto, el material que el programa envíe allí sale de tu equipo y debe tratarse según las condiciones y políticas del proveedor.</p>
+      </div>
+
+      <h3>2.4. GraphRAG</h3>
+      <p>GraphRAG combina recuperación de información (RAG) con relaciones representadas en un grafo. En vez de limitarse a buscar palabras parecidas, puede utilizar conexiones entre entidades para recuperar contexto relacionado.</p>
+      <p>La documentación del proyecto menciona GraphRAG en su flujo. No interpretes el término como garantía de que el sistema siempre recupera toda la información correcta.</p>
+
+      <h3>2.5. Creación de agentes/personas</h3>
+      <p>El servicio <code class="inline-code">OasisProfileGenerator</code> convierte entidades filtradas del grafo en perfiles que OASIS puede utilizar. El código contempla atributos como nombre de usuario, biografía, profesión, temas de interés y otros datos del perfil.</p>
+      <p>Un perfil es una descripción computacional. No es una entrevista real ni una muestra estadística de la población.</p>
+
+      <h3>2.6. OASIS y CAMEL-AI</h3>
+      <p>El README oficial declara que el motor de simulación de MiroFish está impulsado por <strong>OASIS</strong>, desarrollado por el equipo <strong>CAMEL-AI</strong>. OASIS es un simulador de interacciones sociales en plataformas tipo Twitter y Reddit. En el <code class="inline-code">pyproject.toml</code> consultado aparecen las dependencias <code class="inline-code">camel-oasis==0.2.5</code> y <code class="inline-code">camel-ai==0.2.78</code>.</p>
+      <p>La documentación de OASIS explica que sus agentes sociales pueden publicar y realizar otras acciones dentro de plataformas simuladas. MiroFish integra esa tecnología y prepara perfiles/configuración propios.</p>
+
+      <h3>2.7. Dos plataformas simuladas</h3>
+      <p>El código de MiroFish gestiona configuraciones para Twitter y Reddit y permite activar ambas plataformas por configuración de simulación. No se trata de conectarse a cuentas reales de esas redes: se trata de entornos simulados que representan dinámicas de plataformas sociales.</p>
+
+      <h3>2.8. Memoria individual y colectiva</h3>
+      <p>La memoria permite que el contexto de interacciones anteriores influya en interacciones posteriores. En el diseño de MiroFish, Zep participa en la memoria/gráfico y el backend incorpora componentes para actualizar la memoria del grafo durante la simulación.</p>
+      <p>No supongas que la memoria es ilimitada, infalible o idéntica a la memoria humana.</p>
+
+      <h3>2.9. Informe y conversación posterior</h3>
+      <p>El repositorio contiene <code class="inline-code">ReportAgent</code>, así como rutas de API para conversar con él. El objetivo es producir un informe con herramientas para consultar el entorno posterior a la simulación. También existe un flujo de interacción con agentes individuales.</p>
+      <p style="margin-bottom:0;"><strong>Regla de lectura:</strong> el informe es una interpretación generada por IA sobre un mundo artificial. Busca qué datos lo sustentan, qué afirmaciones son hipótesis y qué no se puede concluir.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(0)">← Anterior: Inicio</button>
+      <button class="btn-nav-step next" onclick="go(2)">Siguiente: Requisitos Previos →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 2: REQUISITOS ==================== -->
+  <section class="tab-panel" data-t="Requisitos Previos" id="sec-2">
+    <h2 class="section-title">3. Qué necesitamos antes de instalarlo</h2>
+
+    <div class="card">
+      <h3>3.1. Windows 11</h3>
+      <p>La ruta principal de este tutorial utiliza PowerShell en Windows 11. No necesitas instalar Linux ni Docker.</p>
+      <p>Para comprobar tu versión:</p>
+      <ol>
+        <li>Pulsa <code class="inline-code">Windows + R</code>.</li>
+        <li>Escribe <code class="inline-code">winver</code>.</li>
+        <li>Pulsa Intro.</li>
+        <li>Lee la edición, versión y compilación.</li>
+      </ol>
+      <p>El README de MiroFish no fija una cantidad mínima de RAM, espacio libre ni una GPU. No inventaremos esos requisitos.</p>
+      <p><strong>Recomendación práctica:</strong> conexión estable, espacio libre suficiente para el repositorio, dependencias y archivos de trabajo, y al menos 8 GB de RAM como punto de partida razonable para un equipo de escritorio. No es una exigencia oficial de MiroFish. El uso de memoria real depende del tamaño de documentos, agentes, procesos y navegador.</p>
+
+      <h3>3.2. Node.js y npm</h3>
+      <p>Node.js permite ejecutar herramientas JavaScript fuera del navegador. npm instala paquetes de JavaScript. El proyecto requiere Node.js 18 o superior; para una instalación nueva conviene escoger una versión LTS vigente compatible.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Comprobación Node.js</span><button class="btn-copy" data-copy="node -v&#10;npm -v">COPIAR</button></div>
+        <pre class="code-content">node -v
+npm -v</pre>
+      </div>
+      <p><code class="inline-code">node -v</code> debe mostrar 18 o superior. <code class="inline-code">npm -v</code> debe devolver una versión, no un error.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Descarga oficial de Node.js</div>
+          <div class="url-raw">https://nodejs.org/en/download/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://nodejs.org/en/download/">COPIAR URL</button>
+          <a href="https://nodejs.org/en/download/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+
+      <h3>3.3. Python</h3>
+      <p>Python es el lenguaje principal del backend. El archivo <code class="inline-code">backend/pyproject.toml</code> exige <code class="inline-code">&gt;=3.11,&lt;3.13</code>, es decir, Python 3.11 o 3.12. No instales Python 3.13, 3.14 o 3.15 para este entorno salvo que una versión posterior de MiroFish actualice expresamente el requisito.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Descarga oficial Python 3.12.10</div>
+          <div class="url-raw">https://www.python.org/downloads/release/python-31210/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://www.python.org/downloads/release/python-31210/">COPIAR URL</button>
+          <a href="https://www.python.org/downloads/release/python-31210/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Documentación oficial Python 3.12 en Windows</div>
+          <div class="url-raw">https://docs.python.org/3.12/using/windows.html</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://docs.python.org/3.12/using/windows.html">COPIAR URL</button>
+          <a href="https://docs.python.org/3.12/using/windows.html" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Comprobación Python</span><button class="btn-copy" data-copy="python --version&#10;py -0p">COPIAR</button></div>
+        <pre class="code-content">python --version
+py -0p</pre>
+      </div>
+      <p>El primer comando debe mostrar Python 3.11.x o 3.12.x. El segundo enumera las instalaciones que detecta el lanzador de Python.</p>
+
+      <h3>3.4. uv</h3>
+      <p><code class="inline-code">uv</code> es un gestor de paquetes y entornos Python. MiroFish lo utiliza en <code class="inline-code">npm run setup:backend</code> y <code class="inline-code">uv run</code>. El comando <code class="inline-code">uv sync</code> instala las dependencias declaradas y prepara el entorno del proyecto.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Instalación oficial de uv</span><button class="btn-copy" data-copy='powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"'>COPIAR</button></div>
+        <pre class="code-content">powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</pre>
+      </div>
+      <p>Este comando descarga y ejecuta el instalador oficial. Si prefieres inspeccionar el script antes, la documentación oficial explica cómo hacerlo. Cierra PowerShell, abre una ventana nueva y comprueba:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar uv</span><button class="btn-copy" data-copy="uv --version">COPIAR</button></div>
+        <pre class="code-content">uv --version</pre>
+      </div>
+
+      <h3>3.5. Git</h3>
+      <p>Git registra versiones de archivos y permite descargar/clonar un repositorio. Es el camino recomendado aquí porque facilita actualizar el código y consultar cambios. No es una dependencia de ejecución declarada en <code class="inline-code">package.json</code>, pero sí es necesario para seguir el método de clonación de este tutorial.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Descarga Git for Windows</div>
+          <div class="url-raw">https://git-scm.com/install/windows</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://git-scm.com/install/windows">COPIAR URL</button>
+          <a href="https://git-scm.com/install/windows" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Comprobación Git</span><button class="btn-copy" data-copy="git --version">COPIAR</button></div>
+        <pre class="code-content">git --version</pre>
+      </div>
+
+      <h3>3.6. Docker</h3>
+      <p>Docker empaqueta programas y dependencias en contenedores. Es una alternativa de despliegue, no un requisito de la instalación desde código fuente. Se explica en la pestaña Docker.</p>
+
+      <h3>3.7. Proveedor de modelos y API</h3>
+      <p>MiroFish necesita un modelo de lenguaje remoto mediante una API compatible con el formato del SDK OpenAI. Una API es una puerta de comunicación entre programas. Una API key es una credencial privada que autoriza el uso.</p>
+      <p>El README recomienda Qwen-plus de Alibaba Cloud Model Studio (Bailian), con endpoint compatible. Es una recomendación del repositorio, no una obligación exclusiva.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Proveedor recomendado por el README (Alibaba Cloud Bailian)</div>
+          <div class="url-raw">https://bailian.console.aliyun.com/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://bailian.console.aliyun.com/">COPIAR URL</button>
+          <a href="https://bailian.console.aliyun.com/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Documentación de compatibilidad OpenAI / DashScope</div>
+          <div class="url-raw">https://www.alibabacloud.com/help/es/model-studio/compatibility-of-openai-with-dashscope</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://www.alibabacloud.com/help/es/model-studio/compatibility-of-openai-with-dashscope">COPIAR URL</button>
+          <a href="https://www.alibabacloud.com/help/es/model-studio/compatibility-of-openai-with-dashscope" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <p><strong>Antes de generar una clave:</strong></p>
+      <ol>
+        <li>Comprueba el país/región y el endpoint de tu cuenta.</li>
+        <li>Revisa qué modelo está habilitado.</li>
+        <li>Consulta precios, cuotas, límites y facturación.</li>
+        <li>No des por hecho que una prueba gratuita seguirá disponible.</li>
+        <li>Crea una clave específica para este proyecto y protégela.</li>
+      </ol>
+
+      <h3>3.8. Zep Cloud</h3>
+      <p>Zep aporta funciones de memoria y grafo utilizadas por MiroFish. La aplicación requiere <code class="inline-code">ZEP_API_KEY</code>. El README consultado enlaza a <code class="inline-code">https://app.getzep.com/</code> y comenta una cuota gratuita, pero <strong>no debes asumir que la gratuidad o las condiciones antiguas siguen vigentes</strong>.</p>
+      <p>La página de precios consultada el 22/11/2026 presenta planes de autoservicio basados en créditos y una prueba gratuita con límites; los planes publicados pueden cambiar. Revisa siempre la página actual:</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Zep Cloud — Acceso y Portal</div>
+          <div class="url-raw">https://app.getzep.com/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://app.getzep.com/">COPIAR URL</button>
+          <a href="https://app.getzep.com/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Zep Cloud — Precios actuales</div>
+          <div class="url-raw">https://www.getzep.com/pricing/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://www.getzep.com/pricing/">COPIAR URL</button>
+          <a href="https://www.getzep.com/pricing/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Zep Cloud — Documentación oficial</div>
+          <div class="url-raw">https://help.getzep.com/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://help.getzep.com/">COPIAR URL</button>
+          <a href="https://help.getzep.com/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+
+      <h3>3.9. Checklist previo interactivo</h3>
+      <div id="checklist-previo">
+        <label class="checklist-item"><input type="checkbox" data-chk="pre1"><span>Windows 11 actualizado y con conexión.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre2"><span>Node.js 18+ y npm comprobados.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre3"><span>Python 3.11 o 3.12 comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre4"><span>uv instalado y comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre5"><span>Git instalado y comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre6"><span>Cuenta/proveedor LLM y API key disponibles.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre7"><span>Cuenta Zep y API key disponibles.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre8"><span>Tarifas, cuotas y privacidad revisadas.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre9"><span>Carpeta de trabajo creada.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="pre10"><span>Ninguna clave compartida por chat, correo o repositorio.</span></label>
+      </div>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(1)">← Anterior: Arquitectura</button>
+      <button class="btn-nav-step next" onclick="go(3)">Siguiente: Instalación Win11 →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 3: INSTALACIÓN WIN11 ==================== -->
+  <section class="tab-panel" data-t="Instalación en Windows 11" id="sec-3">
+    <h2 class="section-title">4. Instalación paso a paso en Windows 11 — ruta principal</h2>
+    <div class="card">
+      <p>Esta es la ruta recomendada: código fuente, PowerShell y herramientas instaladas directamente en Windows. No mezcles estos pasos con Docker.</p>
+
+      <h3>4.1. Preparar el escritorio</h3>
+      <ol>
+        <li>Abre el Explorador de archivos con <code class="inline-code">Windows + E</code>.</li>
+        <li>Entra en <code class="inline-code">Este equipo</code> y abre el disco donde tengas espacio.</li>
+        <li>Crea una carpeta llamada <code class="inline-code">IA</code>.</li>
+        <li>Dentro de ella se creará <code class="inline-code">MiroFish</code>.</li>
+      </ol>
+      <p>La ruta resultante será, por ejemplo, <code class="inline-code">C:\IA\MiroFish</code>. Evita carpetas sincronizadas, rutas con permisos especiales o nombres excesivamente largos.</p>
+      <p><strong>Abrir PowerShell:</strong> pulsa Inicio, escribe <code class="inline-code">PowerShell</code> y abre Windows PowerShell o PowerShell. Los comandos siguientes son para PowerShell, no para CMD ni para una consola Python.</p>
+
+      <h3>4.2. Instalar Node.js</h3>
+      <ol>
+        <li>Abre <code class="inline-code">https://nodejs.org/en/download/</code></li>
+        <li>Descarga el instalador Windows <code class="inline-code">.msi</code> de una versión LTS compatible con Node 18 o superior.</li>
+        <li>Ejecuta el archivo descargado.</li>
+        <li>Acepta la licencia y conserva las opciones predeterminadas, incluida la incorporación de Node al PATH.</li>
+        <li>Finaliza el instalador.</li>
+        <li>Cierra las ventanas de terminal que estuvieran abiertas.</li>
+        <li>Abre una nueva ventana de PowerShell.</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar Node.js</span><button class="btn-copy" data-copy="node -v&#10;npm -v">COPIAR</button></div>
+        <pre class="code-content">node -v
+npm -v</pre>
+      </div>
+      <p>Si aparecen números de versión, la instalación está disponible. Si dice que no reconoce <code class="inline-code">node</code>, cierra y vuelve a abrir PowerShell. Si persiste, revisa que el instalador haya añadido Node al PATH y reinicia Windows antes de reinstalar a ciegas.</p>
+
+      <h3>4.3. Instalar Python 3.12</h3>
+      <ol>
+        <li>Abre <code class="inline-code">https://www.python.org/downloads/release/python-31210/</code></li>
+        <li>Descarga el instalador Windows de 64 bits adecuado para tu equipo.</li>
+        <li>Ejecuta el instalador.</li>
+        <li>Marca <strong>Add python.exe to PATH</strong> si aparece.</li>
+        <li>Elige la instalación recomendada para tu usuario.</li>
+        <li>Completa el asistente.</li>
+        <li>Cierra PowerShell y vuelve a abrirlo.</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar Python</span><button class="btn-copy" data-copy="python --version&#10;py -0p">COPIAR</button></div>
+        <pre class="code-content">python --version
+py -0p</pre>
+      </div>
+      <p>Debe aparecer Python 3.12.x o 3.11.x como versión que utilizarás. Si tienes varias versiones, no elimines otras sin saber qué programas las necesitan. Si <code class="inline-code">python</code> abre Microsoft Store o no se reconoce, prueba:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Comprobar lanzador py</span><button class="btn-copy" data-copy="py -3.12 --version">COPIAR</button></div>
+        <pre class="code-content">py -3.12 --version</pre>
+      </div>
+      <p>Si funciona, Python está instalado pero puede existir un problema de alias/PATH. Ajusta los alias de ejecución de aplicaciones en Configuración de Windows o reinstala marcando PATH. No continúes hasta que puedas identificar claramente la versión.</p>
+
+      <h3>4.4. Instalar uv</h3>
+      <ol>
+        <li>Abre PowerShell.</li>
+        <li>Copia el comando oficial:</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Instalar uv</span><button class="btn-copy" data-copy='powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"'>COPIAR</button></div>
+        <pre class="code-content">powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</pre>
+      </div>
+      <ol start="3">
+        <li>Pulsa Intro y espera a que termine.</li>
+        <li>Cierra la ventana y abre una nueva.</li>
+        <li>Comprueba:</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar uv</span><button class="btn-copy" data-copy="uv --version">COPIAR</button></div>
+        <pre class="code-content">uv --version</pre>
+      </div>
+      <p>Si <code class="inline-code">uv</code> no se reconoce, abre una terminal nueva. Si persiste, consulta la ubicación de instalación indicada por el instalador y comprueba si está en PATH. No descargues ejecutables de páginas desconocidas.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Documentación oficial de instalación de uv</div>
+          <div class="url-raw">https://docs.astral.sh/uv/getting-started/installation/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://docs.astral.sh/uv/getting-started/installation/">COPIAR URL</button>
+          <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+
+      <h3>4.5. Instalar Git</h3>
+      <ol>
+        <li>Abre <code class="inline-code">https://git-scm.com/install/windows</code></li>
+        <li>Descarga Git for Windows para tu arquitectura.</li>
+        <li>Ejecuta el instalador.</li>
+        <li>Para un principiante, conserva las opciones predeterminadas.</li>
+        <li>Termina la instalación.</li>
+        <li>Abre una nueva ventana de PowerShell.</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar Git</span><button class="btn-copy" data-copy="git --version">COPIAR</button></div>
+        <pre class="code-content">git --version</pre>
+      </div>
+
+      <h3>4.6. Descargar MiroFish</h3>
+      <p><strong>Clonar</strong> significa descargar el repositorio con su historial de versiones y conexión al proyecto original. En PowerShell, ejecuta:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Clonar repositorio oficial</span><button class="btn-copy" data-copy="cd C:\IA&#10;git clone https://github.com/666ghj/MiroFish.git&#10;cd MiroFish">COPIAR</button></div>
+        <pre class="code-content">cd C:\IA
+git clone https://github.com/666ghj/MiroFish.git
+cd MiroFish</pre>
+      </div>
+      <ul>
+        <li><code class="inline-code">cd C:\IA</code>: entra en la carpeta de trabajo.</li>
+        <li><code class="inline-code">git clone ...</code>: descarga el repositorio oficial.</li>
+        <li><code class="inline-code">cd MiroFish</code>: entra en la carpeta recién creada.</li>
+      </ul>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar archivos descargados</span><button class="btn-copy" data-copy="Get-Location&#10;Get-ChildItem">COPIAR</button></div>
+        <pre class="code-content">Get-Location
+Get-ChildItem</pre>
+      </div>
+      <p>Debes estar dentro de <code class="inline-code">C:\IA\MiroFish</code> y ver elementos como <code class="inline-code">README.md</code>, <code class="inline-code">package.json</code>, <code class="inline-code">.env.example</code>, <code class="inline-code">backend</code> y <code class="inline-code">frontend</code>.</p>
+      <p><strong>Alternativa ZIP:</strong> en GitHub puedes pulsar <code class="inline-code">Code</code> → <code class="inline-code">Download ZIP</code>, extraerlo y entrar en la carpeta resultante. No tendrás el historial Git ni podrás actualizar mediante <code class="inline-code">git pull</code>. Para esta guía se recomienda clonar.</p>
+
+      <h3>4.7. Crear y editar <code class="inline-code">.env</code></h3>
+      <p><code class="inline-code">.env</code> es un archivo de texto con variables de configuración. Contiene credenciales privadas: no lo publiques ni lo envíes a nadie.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Crear y abrir .env</span><button class="btn-copy" data-copy="Get-Location&#10;Copy-Item .env.example .env&#10;notepad .env">COPIAR</button></div>
+        <pre class="code-content">Get-Location
+Copy-Item .env.example .env
+notepad .env</pre>
+      </div>
+      <p>El contenido base verificado es:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Archivo .env — Plantilla base</span><button class="btn-copy" data-copy="LLM_API_KEY=TU_CLAVE_DEL_PROVEEDOR&#10;LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1&#10;LLM_MODEL_NAME=qwen-plus&#10;ZEP_API_KEY=TU_CLAVE_DE_ZEP">COPIAR</button></div>
+        <pre class="code-content">LLM_API_KEY=TU_CLAVE_DEL_PROVEEDOR
+LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+LLM_MODEL_NAME=qwen-plus
+ZEP_API_KEY=TU_CLAVE_DE_ZEP</pre>
+      </div>
+      <p>Reemplaza los textos ficticios por tus claves reales <strong>solo en tu ordenador</strong>. Conserva las líneas de nombre de variable y no añadas comillas salvo que la documentación del proveedor las exija. La URL y el modelo del ejemplo corresponden a la recomendación que aparece en el archivo <code class="inline-code">.env.example</code> consultado; tu cuenta/proveedor puede requerir otro endpoint y modelo.</p>
+      <ul>
+        <li><code class="inline-code">LLM_API_KEY</code>: credencial para llamar al modelo.</li>
+        <li><code class="inline-code">LLM_BASE_URL</code>: dirección base del servicio de modelos.</li>
+        <li><code class="inline-code">LLM_MODEL_NAME</code>: identificador exacto del modelo que el proveedor ofrece.</li>
+        <li><code class="inline-code">ZEP_API_KEY</code>: credencial para Zep Cloud.</li>
+      </ul>
+      <p>El archivo de ejemplo también muestra tres variables opcionales de aceleración: <code class="inline-code">LLM_BOOST_API_KEY</code>, <code class="inline-code">LLM_BOOST_BASE_URL</code> y <code class="inline-code">LLM_BOOST_MODEL_NAME</code>. El propio ejemplo indica que no deben aparecer si no se utiliza esa configuración. Para la primera instalación, no las añadas. Guarda con <code class="inline-code">Ctrl + S</code> y cierra Bloc de notas.</p>
+      <p><strong>Evita <code class="inline-code">.env.txt</code>:</strong> en Bloc de notas, activa la visualización de extensiones en el Explorador y comprueba que el nombre sea exactamente <code class="inline-code">.env</code>.</p>
+
+      <h4>Comprobar que Git ignora el archivo</h4>
+      <p>El <code class="inline-code">.gitignore</code> actual incluye <code class="inline-code">.env</code>, <code class="inline-code">.env.local</code>, <code class="inline-code">.env.*.local</code>, <code class="inline-code">.env.development</code>, <code class="inline-code">.env.test</code> y <code class="inline-code">.env.production</code>.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar gitignore</span><button class="btn-copy" data-copy="git check-ignore .env">COPIAR</button></div>
+        <pre class="code-content">git check-ignore .env</pre>
+      </div>
+      <p>Debe devolver <code class="inline-code">.env</code> o una ruta equivalente. Si no devuelve nada, detente y revisa el <code class="inline-code">.gitignore</code> antes de publicar o sincronizar el repositorio.</p>
+      <p><strong>Importante:</strong> que Git ignore el archivo no impide que una persona lo copie, lo adjunte o lo publique por otros medios. La protección depende también de tus hábitos.</p>
+
+      <h3>4.8. Instalar dependencias</h3>
+      <p>Una dependencia es una pieza de software que MiroFish necesita para funcionar. Desde la raíz <code class="inline-code">C:\IA\MiroFish</code>, ejecuta:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Instalar todas las dependencias</span><button class="btn-copy" data-copy="npm run setup:all">COPIAR</button></div>
+        <pre class="code-content">npm run setup:all</pre>
+      </div>
+      <p>El script real de <code class="inline-code">package.json</code> encadena:</p>
+      <ul>
+        <li><code class="inline-code">npm run setup</code>: instala dependencias de la raíz y del frontend.</li>
+        <li><code class="inline-code">npm run setup:backend</code>: entra en <code class="inline-code">backend</code> y ejecuta <code class="inline-code">uv sync</code>.</li>
+      </ul>
+      <p>Esto instala herramientas JavaScript y paquetes Python declarados por el proyecto. Necesita Internet y puede tardar. <strong>No cierres la terminal durante la instalación.</strong> Espera a que vuelva el indicador de PowerShell y comprueba que no haya un error final.</p>
+      <p>Si falla: 1. Lee las últimas líneas del error. 2. Identifica si menciona npm, Node, Python, uv, conexión o permisos. 3. Comprueba las versiones con <code class="inline-code">node -v</code>, <code class="inline-code">npm -v</code>, <code class="inline-code">python --version</code> y <code class="inline-code">uv --version</code>. 4. Corrige la causa concreta. 5. Repite la instalación solo después de corregirla. No ejecutes <code class="inline-code">npm audit fix --force</code> como solución general: puede introducir cambios incompatibles.</p>
+
+      <h3>4.9. Arrancar MiroFish</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Arrancar servidor backend y frontend</span><button class="btn-copy" data-copy="npm run dev">COPIAR</button></div>
+        <pre class="code-content">npm run dev</pre>
+      </div>
+      <p>El script oficial ejecuta backend y frontend en paralelo mediante <code class="inline-code">concurrently</code>. El backend arranca con <code class="inline-code">uv run python run.py</code>; el frontend con <code class="inline-code">npm run dev</code> dentro de <code class="inline-code">frontend</code>.</p>
+      <ul>
+        <li>Interfaz web: <code class="inline-code">http://localhost:3000</code></li>
+        <li>API backend: <code class="inline-code">http://localhost:5001</code></li>
+      </ul>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Interfaz web local de MiroFish (cuando esté arrancado)</div>
+          <div class="url-raw">http://localhost:3000</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="http://localhost:3000">COPIAR URL</button>
+          <a href="http://localhost:3000" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <p><strong>Localhost</strong> significa que el navegador se conecta a un servicio que se está ejecutando en tu propio ordenador. No significa que MiroFish esté publicado en Internet. La terminal debe permanecer abierta mientras utilizas MiroFish. Si se cierra, se detienen los procesos iniciados desde ella.</p>
+
+      <h3>4.10. Detener y volver a arrancar</h3>
+      <p>Para detener ambos servicios iniciados con <code class="inline-code">npm run dev</code>, vuelve a la terminal y pulsa <code class="inline-code">Ctrl + C</code>. Confirma si PowerShell pregunta si deseas finalizar el proceso. Para volver a arrancar:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Reiniciar MiroFish</span><button class="btn-copy" data-copy="cd C:\IA\MiroFish&#10;npm run dev">COPIAR</button></div>
+        <pre class="code-content">cd C:\IA\MiroFish
+npm run dev</pre>
+      </div>
+      <p style="margin-bottom:0;">El repositorio guarda datos de proyectos, cargas, simulaciones e informes bajo directorios de backend, incluyendo <code class="inline-code">backend/uploads</code>. El <code class="inline-code">.gitignore</code> ignora <code class="inline-code">backend/uploads/</code>, pero no lo borres si quieres conservar tus proyectos. La configuración <code class="inline-code">.env</code> tampoco debe borrarse. <strong>Antes de actualizar:</strong> detén MiroFish, realiza una copia de seguridad de <code class="inline-code">.env</code> y <code class="inline-code">backend/uploads</code>, y consulta los cambios del repositorio.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(2)">← Anterior: Requisitos</button>
+      <button class="btn-nav-step next" onclick="go(4)">Siguiente: Alternativa Docker →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 4: DOCKER ==================== -->
+  <section class="tab-panel" data-t="Alternativa Docker" id="sec-4">
+    <h2 class="section-title">5. Alternativa: instalación mediante Docker en Windows 11</h2>
+    <div class="card">
+      <p>Docker es una plataforma que ejecuta aplicaciones dentro de contenedores aislados. Un contenedor agrupa el programa y parte de su entorno para facilitar el despliegue.</p>
+      <p><strong>¿Es necesario? No.</strong> El README recomienda instalación desde código fuente y presenta Docker como opción alternativa. Para aprender y diagnosticar, la ruta principal anterior suele ser más transparente.</p>
+
+      <h3>5.1. Requisitos y preparación</h3>
+      <p>Docker Desktop en Windows utiliza normalmente WSL 2 para ejecutar contenedores Linux. La documentación oficial consultada requiere Windows compatible, virtualización habilitada y WSL 2 actualizado. Los requisitos pueden variar según edición, arquitectura y versión de Docker Desktop.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Documentación Docker Desktop en Windows</div>
+          <div class="url-raw">https://docs.docker.com/desktop/setup/install/windows-install/</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://docs.docker.com/desktop/setup/install/windows-install/">COPIAR URL</button>
+          <a href="https://docs.docker.com/desktop/setup/install/windows-install/" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Microsoft — Instalación de WSL 2</div>
+          <div class="url-raw">https://learn.microsoft.com/windows/wsl/install</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://learn.microsoft.com/windows/wsl/install">COPIAR URL</button>
+          <a href="https://learn.microsoft.com/windows/wsl/install" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <p>La documentación actual de Docker indica requisitos de hardware como CPU de 64 bits con SLAT, 8 GB de RAM y virtualización habilitada para WSL 2. Revisa la página oficial antes de instalar.</p>
+
+      <h3>5.2. Instalar Docker Desktop</h3>
+      <ol>
+        <li>Descarga Docker Desktop desde la página oficial.</li>
+        <li>Ejecuta el instalador.</li>
+        <li>Selecciona el backend WSL 2 cuando corresponda.</li>
+        <li>Completa el asistente y reinicia si lo solicita.</li>
+        <li>Abre Docker Desktop y espera a que indique que el motor está activo.</li>
+      </ol>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Verificar Docker</span><button class="btn-copy" data-copy="docker --version&#10;docker compose version">COPIAR</button></div>
+        <pre class="code-content">docker --version
+docker compose version</pre>
+      </div>
+
+      <h3>5.3. Configurar y arrancar</h3>
+      <p>Necesitas un <code class="inline-code">.env</code> válido en la raíz del proyecto, como en la sección 4.7. Docker Compose lo carga mediante <code class="inline-code">env_file: .env</code>. Desde <code class="inline-code">C:\IA\MiroFish</code>:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Levantar contenedores</span><button class="btn-copy" data-copy="docker compose up -d">COPIAR</button></div>
+        <pre class="code-content">docker compose up -d</pre>
+      </div>
+      <p>El archivo <code class="inline-code">docker-compose.yml</code> consultado utiliza <code class="inline-code">ghcr.io/666ghj/mirofish:latest</code>, publica los puertos 3000 y 5001, reinicia el contenedor salvo que se detenga expresamente y monta <code class="inline-code">backend/uploads</code> para conservar las cargas.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Comprobar estado y registros</span><button class="btn-copy" data-copy="docker compose ps&#10;docker compose logs --tail 100">COPIAR</button></div>
+        <pre class="code-content">docker compose ps
+docker compose logs --tail 100</pre>
+      </div>
+      <p>Abre <code class="inline-code">http://localhost:3000</code>.</p>
+
+      <h3>5.4. Detener, reiniciar y retirar</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Gestión del ciclo de vida Docker</span><button class="btn-copy" data-copy="docker compose stop&#10;docker compose start&#10;docker compose logs -f&#10;docker compose down">COPIAR</button></div>
+        <pre class="code-content">docker compose stop
+docker compose start
+docker compose logs -f
+docker compose down</pre>
+      </div>
+      <p>Para salir de la vista de registros (<code class="inline-code">logs -f</code>), pulsa <code class="inline-code">Ctrl + C</code>; esto no equivale a borrar los datos. No añadas <code class="inline-code">-v</code> a <code class="inline-code">docker compose down</code> sin comprenderlo: esa opción puede borrar volúmenes asociados. La carpeta <code class="inline-code">backend/uploads</code> montada en el proyecto es importante para conservar archivos.</p>
+
+      <h3>5.5. Diferencias y precauciones</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Código fuente</th>
+              <th>Docker</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Instalas Node, Python y uv en Windows</td>
+              <td>Docker gestiona el entorno del contenedor</td>
+            </tr>
+            <tr>
+              <td>Diagnóstico directo de cada herramienta</td>
+              <td>Diagnóstico mediante estado y logs</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">npm run dev</code></td>
+              <td><code class="inline-code">docker compose up -d</code></td>
+            </tr>
+            <tr>
+              <td>Adecuado para aprender el proyecto</td>
+              <td>Adecuado para despliegue más empaquetado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-bottom:0;">Docker consume recursos adicionales y no elimina los costes del proveedor LLM ni de Zep. No publiques puertos hacia Internet ni cambies la exposición de red sin comprender autenticación, firewall y seguridad.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(3)">← Anterior: Instalación Win11</button>
+      <button class="btn-nav-step next" onclick="go(5)">Siguiente: Primera Simulación →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 5: PRIMERA SIMULACIÓN ==================== -->
+  <section class="tab-panel" data-t="Primera Simulación" id="sec-5">
+    <h2 class="section-title">6. Primera simulación: tutoría práctica guiada</h2>
+    <div class="card">
+      <p>La primera prueba debe ser neutral, pequeña y barata. No uses datos personales ni documentos confidenciales.</p>
+
+      <h3>6.1. Tema de prueba</h3>
+      <div class="card card-highlight">
+        <p style="margin-bottom:0;"><strong>«Una biblioteca de barrio quiere organizar una tarde mensual de intercambio de libros. ¿Qué reacciones podrían aparecer entre distintos perfiles de vecinos?»</strong></p>
+      </div>
+      <p>Es un tema sencillo, sin consecuencias sanitarias, financieras ni políticas sensibles.</p>
+
+      <h3>6.2. Preparar el documento</h3>
+      <p>Abre Bloc de notas y crea un texto como este. Guárdalo como <code class="inline-code">biblioteca_intercambio.txt</code> en una carpeta fácil de localizar:</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Archivo: biblioteca_intercambio.txt</span><button class="btn-copy" data-copy="PROYECTO FICTICIO: TARDE DE INTERCAMBIO DE LIBROS&#10;&#10;Una biblioteca de barrio estudia organizar una tarde mensual&#10;de intercambio gratuito de libros.&#10;&#10;La actividad se celebraría un sábado por la tarde.&#10;Las personas podrían llevar libros en buen estado y llevarse&#10;otros a cambio, sin obligación de intercambiar uno por uno.&#10;&#10;La biblioteca dispone de una sala pequeña y de dos voluntarios.&#10;No se ha realizado todavía ninguna encuesta a los vecinos.&#10;&#10;Preguntas abiertas:&#10;- ¿Qué horarios podrían resultar cómodos?&#10;- ¿Qué dificultades logísticas pueden aparecer?&#10;- ¿Cómo se podría informar a los vecinos?&#10;- ¿Qué perfiles podrían apoyar o no participar?&#10;- ¿Qué cambios sencillos harían la actividad más accesible?&#10;&#10;Este documento es ficticio y no contiene datos personales.">COPIAR</button></div>
+        <pre class="code-content">PROYECTO FICTICIO: TARDE DE INTERCAMBIO DE LIBROS
+
+Una biblioteca de barrio estudia organizar una tarde mensual
+de intercambio gratuito de libros.
+
+La actividad se celebraría un sábado por la tarde.
+Las personas podrían llevar libros en buen estado y llevarse
+otros a cambio, sin obligación de intercambiar uno por uno.
+
+La biblioteca dispone de una sala pequeña y de dos voluntarios.
+No se ha realizado todavía ninguna encuesta a los vecinos.
+
+Preguntas abiertas:
+- ¿Qué horarios podrían resultar cómodos?
+- ¿Qué dificultades logísticas pueden aparecer?
+- ¿Cómo se podría informar a los vecinos?
+- ¿Qué perfiles podrían apoyar o no participar?
+- ¿Qué cambios sencillos harían la actividad más accesible?
+
+Este documento es ficticio y no contiene datos personales.</pre>
+      </div>
+
+      <h3>6.3. Cargarlo en MiroFish</h3>
+      <p>La interfaz y los textos pueden cambiar entre versiones. El repositorio confirma una pantalla de inicio, carga de archivos, un flujo de cinco pasos y una etapa de construcción de grafo. El componente de frontend <code class="inline-code">MainView.vue</code> muestra los pasos Graph Building, Environment Setup, Simulation, Report Generation y Deep Interaction.</p>
+      <p>La API del backend admite extensiones PDF, MD, TXT y MARKDOWN; el límite configurado es 50 MB. Para esta práctica utiliza el <code class="inline-code">.txt</code>.</p>
+      <ol>
+        <li>Abre <code class="inline-code">http://localhost:3000</code>.</li>
+        <li>En la pantalla de inicio localiza el flujo para crear un proyecto/cargar documentos. No confundas la pantalla de inicio con una pantalla de simulación ya creada.</li>
+        <li>Selecciona el archivo <code class="inline-code">biblioteca_intercambio.txt</code>.</li>
+        <li>Introduce una pregunta de simulación clara y neutral cuando la interfaz la solicite.</li>
+        <li>Continúa y observa la fase de análisis y construcción del grafo.</li>
+      </ol>
+      <p><em>No inventamos aquí el nombre exacto de cada botón: la interfaz puede cambiar y el código inspeccionado no justifica asegurar que todos los textos visibles sean idénticos en cada idioma.</em></p>
+
+      <h3>6.4. Prompt recomendado</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Prompt de simulación — Biblioteca de barrio</span><button class="btn-copy" data-copy="Explora posibles reacciones ante la propuesta ficticia de organizar&#10;una tarde mensual de intercambio gratuito de libros en una biblioteca&#10;de barrio.&#10;&#10;Considera perfiles diversos: personas que leen con frecuencia,&#10;familias, estudiantes, personas mayores, voluntarios y vecinos que&#10;apenas utilizan la biblioteca.&#10;&#10;No presupongas que la propuesta tendrá éxito. Representa tanto&#10;reacciones favorables como dudas, objeciones y falta de interés.&#10;&#10;Identifica posibles obstáculos de horario, accesibilidad, espacio,&#10;organización y comunicación.&#10;&#10;Distingue hechos presentes en el documento de hipótesis generadas&#10;por la simulación. No inventes encuestas ni datos reales.&#10;El objetivo es explorar escenarios, no predecir el comportamiento&#10;de los vecinos reales.">COPIAR</button></div>
+        <pre class="code-content">Explora posibles reacciones ante la propuesta ficticia de organizar
+una tarde mensual de intercambio gratuito de libros en una biblioteca
+de barrio.
+
+Considera perfiles diversos: personas que leen con frecuencia,
+familias, estudiantes, personas mayores, voluntarios y vecinos que
+apenas utilizan la biblioteca.
+
+No presupongas que la propuesta tendrá éxito. Representa tanto
+reacciones favorables como dudas, objeciones y falta de interés.
+
+Identifica posibles obstáculos de horario, accesibilidad, espacio,
+organización y comunicación.
+
+Distingue hechos presentes en el documento de hipótesis generadas
+por la simulación. No inventes encuestas ni datos reales.
+El objetivo es explorar escenarios, no predecir el comportamiento
+de los vecinos reales.</pre>
+      </div>
+
+      <h3>6.5. Qué ocurre durante el flujo</h3>
+      <ul>
+        <li><strong>Paso 1 — Graph Building:</strong> MiroFish analiza el documento, construye una ontología y un grafo. Observa los mensajes de progreso y comprueba si el proceso termina correctamente.</li>
+        <li><strong>Paso 2 — Environment Setup:</strong> la interfaz muestra el proceso de inicialización, generación de perfiles de agentes y configuración de plataformas. El componente <code class="inline-code">Step2EnvSetup.vue</code> confirma que se preparan perfiles y una configuración de simulación; muestra información de agentes y parámetros generados.</li>
+        <li><strong>Paso 3 — Simulation:</strong> la aplicación ejecuta la simulación. El repositorio contempla plataformas tipo Twitter y Reddit, y estados de ejecución como iniciado, en marcha, pausado, detenido, completado o fallido.</li>
+        <li><strong>Paso 4 — Report Generation:</strong> se crea un informe mediante ReportAgent.</li>
+        <li><strong>Paso 5 — Deep Interaction:</strong> la aplicación ofrece interacción posterior con el entorno simulado y los agentes, según el flujo de la versión actual.</li>
+      </ul>
+
+      <h3>6.6. Cómo reducir el coste</h3>
+      <p>El README advierte expresamente que el consumo puede ser alto y recomienda empezar con menos de 40 rondas. El backend contiene un valor predeterminado de 10 rondas (<code class="inline-code">OASIS_DEFAULT_MAX_ROUNDS</code>), pero el sistema también genera parámetros de simulación y el flujo de interfaz puede cambiar. No des por hecho que ese valor sea el número definitivo de todas las ejecuciones.</p>
+      <ul>
+        <li>Utiliza un documento corto.</li>
+        <li>No repitas la simulación varias veces sin motivo.</li>
+        <li>Mantén los parámetros conservadores que permita la interfaz.</li>
+        <li>Si se ofrece un modo personalizado, revisa los límites antes de iniciar.</li>
+        <li>Comprueba la facturación del proveedor y los créditos de Zep.</li>
+      </ul>
+
+      <h3>6.7. Interpretar los resultados</h3>
+      <p>Al terminar, separa el contenido en cuatro grupos:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Qué significa</th>
+              <th>Ejemplo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hecho de entrada</strong></td>
+              <td>Está escrito en el documento</td>
+              <td>La sala es pequeña</td>
+            </tr>
+            <tr>
+              <td><strong>Resultado observado</strong></td>
+              <td>Aparece en la simulación</td>
+              <td>Un agente propone reservar plazas</td>
+            </tr>
+            <tr>
+              <td><strong>Hipótesis</strong></td>
+              <td>Explicación posible</td>
+              <td>La falta de horario puede reducir participación</td>
+            </tr>
+            <tr>
+              <td><strong>Conclusión externa</strong></td>
+              <td>Requiere contrastar con realidad</td>
+              <td>Los vecinos prefieren el sábado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p><em>No conviertas una frase generada por un agente en una declaración real de un vecino.</em></p>
+
+      <h3>6.8. Prompt malo y prompt mejorado</h3>
+      <div class="card card-danger">
+        <strong>Prompt Malo:</strong>
+        <p style="margin:6px 0;">«Demuestra que la biblioteca será un éxito y que todo el mundo estará encantado.»</p>
+        <p style="margin-bottom:0;font-size:0.88rem;"><em>Problemas: impone una conclusión, excluye resultados contrarios y fomenta sesgo de confirmación.</em></p>
+      </div>
+      <div class="card card-success">
+        <strong>Prompt Mejorado:</strong>
+        <div class="code-block-wrap" style="margin-bottom:0;">
+          <div class="code-header"><span>Prompt Neutral Mejorado</span><button class="btn-copy" data-copy="Explora reacciones diversas ante la propuesta. Incluye apoyo, indiferencia, objeciones y alternativas. Explica qué aspectos dependen de supuestos no comprobados y qué información real haría falta para evaluar la viabilidad.">COPIAR</button></div>
+          <pre class="code-content">Explora reacciones diversas ante la propuesta. Incluye apoyo, indiferencia, objeciones y alternativas. Explica qué aspectos dependen de supuestos no comprobados y qué información real haría falta para evaluar la viabilidad.</pre>
+        </div>
+      </div>
+
+      <h3>6.9. Guardar resultados</h3>
+      <p style="margin-bottom:0;">La API del proyecto mantiene datos de cargas, simulaciones e informes en el directorio <code class="inline-code">backend/uploads</code>. No supongas que existe un botón de exportación en todas las pantallas. Si no encuentras una exportación visible, copia el informe y registra manualmente la fecha, el prompt, el documento, el modelo y la configuración en un archivo propio.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(4)">← Anterior: Docker</button>
+      <button class="btn-nav-step next" onclick="go(6)">Siguiente: Diseño Avanzado →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 6: DISEÑO AVANZADO ==================== -->
+  <section class="tab-panel" data-t="Diseño de Simulaciones" id="sec-6">
+    <h2 class="section-title">7. Cómo diseñar simulaciones de mayor calidad</h2>
+    <div class="card">
+      <p>Una simulación útil empieza por una pregunta concreta, no por una gran cantidad de agentes.</p>
+
+      <h3>7.1. Método de trabajo</h3>
+      <ol>
+        <li><strong>Define la pregunta:</strong> debe poder responderse mediante escenarios comparables.</li>
+        <li><strong>Fija el objetivo:</strong> exploración, planificación, ficción o generación de hipótesis.</li>
+        <li><strong>Reúne material relevante:</strong> actual, equilibrado, verificable y suficiente.</li>
+        <li><strong>Anota lo que falta:</strong> no ocultes lagunas de información.</li>
+        <li><strong>Identifica actores:</strong> personas o grupos relevantes, sin convertir estereotipos en perfiles.</li>
+        <li><strong>Define variables:</strong> horario, precio, acceso, reglas, comunicación u otras.</li>
+        <li><strong>Evita inducir la respuesta:</strong> no ordenes al sistema que confirme tu opinión.</li>
+        <li><strong>Ejecuta una prueba pequeña:</strong> antes de ampliar rondas o agentes.</li>
+        <li><strong>Registra la configuración:</strong> permite repetir y comparar.</li>
+        <li><strong>Contrasta fuera de MiroFish:</strong> con fuentes, datos y personas reales cuando sea apropiado.</li>
+      </ol>
+
+      <h3>7.2. Plantilla de preparación</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Plantilla de Diseño Experimental</span><button class="btn-copy" data-copy="TÍTULO:&#10;FECHA:&#10;OBJETIVO:&#10;PREGUNTA PRINCIPAL:&#10;TIPO DE SIMULACIÓN: exploratoria / narrativa / planificación&#10;DOCUMENTOS DE PARTIDA:&#10;FUENTES Y FECHAS:&#10;HECHOS CONFIRMADOS:&#10;DATOS QUE FALTAN:&#10;ACTORES A REPRESENTAR:&#10;VARIABLES:&#10;SUPUESTOS:&#10;ESCENARIO A:&#10;ESCENARIO B:&#10;LÍMITES DE LA SIMULACIÓN:&#10;RIESGOS DE SESGO:&#10;CRITERIOS PARA EVALUAR RESULTADOS:&#10;CÓMO SE CONTRASTARÁN FUERA DE MIROFISH:">COPIAR</button></div>
+        <pre class="code-content">TÍTULO:
+FECHA:
+OBJETIVO:
+PREGUNTA PRINCIPAL:
+TIPO DE SIMULACIÓN: exploratoria / narrativa / planificación
+DOCUMENTOS DE PARTIDA:
+FUENTES Y FECHAS:
+HECHOS CONFIRMADOS:
+DATOS QUE FALTAN:
+ACTORES A REPRESENTAR:
+VARIABLES:
+SUPUESTOS:
+ESCENARIO A:
+ESCENARIO B:
+LÍMITES DE LA SIMULACIÓN:
+RIESGOS DE SESGO:
+CRITERIOS PARA EVALUAR RESULTADOS:
+CÓMO SE CONTRASTARÁN FUERA DE MIROFISH:</pre>
+      </div>
+
+      <h3>7.3. Plantilla de prompt reutilizable</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Plantilla Maestra de Prompt Multiagente</span><button class="btn-copy" data-copy="OBJETIVO&#10;Quiero explorar [pregunta concreta].&#10;&#10;CONTEXTO&#10;Utiliza únicamente como información de partida [documentos].&#10;&#10;ACTORES&#10;Considera [grupos o perfiles], incluyendo diversidad de opiniones&#10;y personas que no participen.&#10;&#10;ESCENARIOS&#10;Compara [escenario A] con [escenario B], manteniendo constantes&#10;las demás condiciones siempre que sea posible.&#10;&#10;NEUTRALIDAD&#10;No presupongas que un escenario es mejor. Incluye respuestas&#10;favorables, desfavorables, indiferentes e inesperadas.&#10;&#10;LÍMITES&#10;No inventes estadísticas ni hechos externos. Señala los supuestos.&#10;&#10;RESULTADO&#10;Resume patrones observados, diferencias entre escenarios,&#10;incertidumbres, explicaciones alternativas y datos reales que&#10;deberían recopilarse antes de tomar una decisión.">COPIAR</button></div>
+        <pre class="code-content">OBJETIVO
+Quiero explorar [pregunta concreta].
+
+CONTEXTO
+Utiliza únicamente como información de partida [documentos].
+
+ACTORES
+Considera [grupos o perfiles], incluyendo diversidad de opiniones
+y personas que no participen.
+
+ESCENARIOS
+Compara [escenario A] con [escenario B], manteniendo constantes
+las demás condiciones siempre que sea posible.
+
+NEUTRALIDAD
+No presupongas que un escenario es mejor. Incluye respuestas
+favorables, desfavorables, indiferentes e inesperadas.
+
+LÍMITES
+No inventes estadísticas ni hechos externos. Señala los supuestos.
+
+RESULTADO
+Resume patrones observados, diferencias entre escenarios,
+incertidumbres, explicaciones alternativas y datos reales que
+deberían recopilarse antes de tomar una decisión.</pre>
+      </div>
+
+      <h3>7.4. Comparar escenarios correctamente</h3>
+      <p>Cambia una variable cada vez cuando sea posible. Si modificas simultáneamente el precio, el horario, el número de agentes y el mensaje de comunicación, no sabrás qué cambio explica la diferencia.</p>
+      <p><strong>Registra:</strong></p>
+      <ul>
+        <li>Documento de entrada y su versión.</li>
+        <li>Prompt exacto.</li>
+        <li>Proveedor y modelo.</li>
+        <li>Fecha y hora.</li>
+        <li>Parámetros visibles.</li>
+        <li>Número de rondas/agentes cuando se conozca.</li>
+        <li>Resultado y errores.</li>
+        <li>Coste real facturado.</li>
+      </ul>
+      <p>Repite una prueba si necesitas estudiar variabilidad, pero no presentes una repetición como validación científica. Comprueba también si el modelo o sus parámetros cambiaron entre ejecuciones.</p>
+
+      <h3>7.5. Señales de alerta</h3>
+      <ul style="margin-bottom:0;">
+        <li>El informe confirma exactamente lo que querías oír.</li>
+        <li>Todos los agentes parecen pensar igual.</li>
+        <li>Se citan hechos que no aparecen en los documentos.</li>
+        <li>Aparecen porcentajes sin explicar cómo se calcularon.</li>
+        <li>Se utilizan perfiles estereotipados.</li>
+        <li>Una conclusión depende de un único agente o una única interacción.</li>
+        <li>Se presenta el resultado como certeza.</li>
+      </ul>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(5)">← Anterior: Primera Simulación</button>
+      <button class="btn-nav-step next" onclick="go(7)">Siguiente: Seguridad y Costes →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 7: SEGURIDAD Y COSTES ==================== -->
+  <section class="tab-panel" data-t="Seguridad, Privacidad y Costes" id="sec-7">
+    <h2 class="section-title">8. Seguridad, privacidad, costes y responsabilidad</h2>
+    <div class="card">
+      <h3>8.1. Protege las API keys</h3>
+      <p>Una API key equivale a una contraseña técnica. Quien la obtiene puede utilizar tu cuota o generar cargos.</p>
+      <ul>
+        <li>No la pegues en un chat.</li>
+        <li>No la incluyas en capturas.</li>
+        <li>No la publiques en GitHub.</li>
+        <li>No la envíes por correo sin un canal seguro.</li>
+        <li>No la guardes en un documento que vayas a compartir.</li>
+        <li>Revócala si sospechas que se ha filtrado.</li>
+      </ul>
+
+      <h3>8.2. Archivo <code class="inline-code">.env</code> y Git</h3>
+      <p>El <code class="inline-code">.gitignore</code> oficial incluye <code class="inline-code">.env</code> y variantes. Verifica con <code class="inline-code">git check-ignore .env</code>. Nunca confíes exclusivamente en que el archivo esté ignorado: revisa qué archivos seleccionas antes de hacer un commit o subir un proyecto.</p>
+
+      <h3>8.3. Qué datos salen del ordenador</h3>
+      <p>MiroFish usa servicios externos:</p>
+      <ul>
+        <li>El proveedor LLM recibe solicitudes y contexto para generar respuestas.</li>
+        <li>Zep Cloud recibe los datos que el backend envía para construir y consultar grafos/memoria.</li>
+      </ul>
+      <div class="card card-danger">
+        <p style="margin-bottom:0;">Por tanto, no cargues historiales privados, documentos laborales confidenciales, datos de clientes, expedientes, información sanitaria, financiera o identificadores personales sin una evaluación adecuada de base jurídica, privacidad, contrato y políticas del proveedor.</p>
+      </div>
+
+      <h3>8.4. Costes</h3>
+      <p>Puede haber costes en:</p>
+      <ul>
+        <li>Tokens de entrada y salida del modelo.</li>
+        <li>Llamadas repetidas durante extracción, generación de perfiles, simulación e informes.</li>
+        <li>Créditos o consumo de Zep.</li>
+        <li>Servicios complementarios contratados.</li>
+      </ul>
+      <p>El número de agentes y rondas no es el único factor. Un documento largo, perfiles detallados, interacciones y generación de informes pueden multiplicar las llamadas. Consulta precios antes y después de una ejecución. Configura límites de gasto y alertas si el proveedor lo permite. No asumas que el ejemplo del README es gratuito.</p>
+
+      <h3>8.5. Dependencias y software de terceros</h3>
+      <p>MiroFish instala paquetes de terceros. Mantén el repositorio actualizado con prudencia, descarga desde fuentes oficiales y evita ejecutar scripts desconocidos. No fuerces actualizaciones de dependencias sin revisar el impacto.</p>
+
+      <h3>8.6. Licencia AGPL-3.0</h3>
+      <p>El repositorio declara licencia <strong>GNU Affero General Public License versión 3 (AGPL-3.0)</strong>. En términos generales, es una licencia de software libre con obligaciones de copyleft. La AGPL incorpora condiciones específicas para software modificado que se ofrece a usuarios a través de una red: puede exigir ofrecer el código fuente correspondiente de la versión modificada a esos usuarios, según las circunstancias y términos de la licencia.</p>
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">Licencia oficial AGPL-3.0 de MiroFish</div>
+          <div class="url-raw">https://github.com/666ghj/MiroFish/blob/main/LICENSE</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="https://github.com/666ghj/MiroFish/blob/main/LICENSE">COPIAR URL</button>
+          <a href="https://github.com/666ghj/MiroFish/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+      <p><em>Esto no es asesoramiento jurídico. Si vas a ofrecer MiroFish como servicio o distribuir una versión modificada, consulta a un profesional especializado.</em></p>
+
+      <h3>8.7. No publiques el servicio local sin entenderlo</h3>
+      <p>El backend se inicia con host <code class="inline-code">0.0.0.0</code> por defecto y el frontend también utiliza <code class="inline-code">vite --host</code>. Esto puede hacer que los servicios escuchen en interfaces de red más amplias que <code class="inline-code">localhost</code>, dependiendo del firewall y la red. No significa que estén automáticamente accesibles desde Internet, pero sí obliga a ser prudente en redes compartidas. No abras puertos en el router, no desactives el firewall y no publiques el servicio en una IP pública sin revisar autenticación, exposición de datos, configuración de producción y seguridad.</p>
+
+      <h3>8.8. Responsabilidad</h3>
+      <p style="margin-bottom:0;">MiroFish sirve para explorar escenarios. No reemplaza investigación, expertos, datos observados ni decisiones responsables. La apariencia sofisticada de un informe no es prueba de que sus afirmaciones sean ciertas.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(6)">← Anterior: Diseño Avanzado</button>
+      <button class="btn-nav-step next" onclick="go(8)">Siguiente: 33 Preguntas (Q&amp;A) →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 8: 33 PREGUNTAS (Q&A) ==================== -->
+  <section class="tab-panel" data-t="33 Preguntas (Q&A)" id="sec-8">
+    <h2 class="section-title">10. 33 preguntas y respuestas — de principiante a experto práctico</h2>
+    <p>Explora las 33 preguntas ordenadas progresivamente por dificultad (Nivel 1, Nivel 2 y Nivel 3). Por defecto todas las respuestas aparecen plegadas para facilitar la lectura rápida.</p>
+
+    <div class="qa-controls">
+      <button class="btn-qa-toggle" id="btn-expand-all-qa">+ Desplegar todas respuestas</button>
+      <button class="btn-qa-toggle" id="btn-collapse-all-qa">- Plegar todas las respuestas</button>
+    </div>
+
+    <div id="qa-accordion-container">
+      <h3>Nivel 1 — Absolutamente principiante</h3>
+
+      <details class="qa-item">
+        <summary>1. ¿Qué es MiroFish en una frase?</summary>
+        <div class="qa-answer">Es un proyecto que crea un entorno social simulado con agentes de IA para explorar cómo podrían desarrollarse determinados escenarios a partir de información de partida.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>2. ¿MiroFish es un chatbot?</summary>
+        <div class="qa-answer">No exactamente. Un chatbot responde en una conversación; MiroFish organiza un flujo con documentos, grafos, perfiles de agentes, simulación social e informes. Incluye además funciones para conversar con agentes después de simular.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>3. ¿Qué es un agente de IA?</summary>
+        <div class="qa-answer">Es un programa que utiliza un modelo de IA para interpretar contexto y elegir acciones dentro de unas reglas. En MiroFish, un agente representa un perfil simulado que puede participar en interacciones sociales.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>4. ¿Qué significa simular un escenario?</summary>
+        <div class="qa-answer">Significa crear una representación artificial de una situación y observar qué resultados aparecen al aplicar determinadas reglas y supuestos. No significa que el futuro vaya a comportarse así.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>5. ¿Necesito saber programar?</summary>
+        <div class="qa-answer">No para seguir la instalación y el flujo básico si sigues los pasos con cuidado. Sí ayuda aprender conceptos técnicos para diagnosticar errores, modificar el proyecto o entender sus límites.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>6. ¿Qué significa que MiroFish se ejecute en mi ordenador?</summary>
+        <div class="qa-answer">La interfaz y el backend se ejecutan localmente, y accedes a ellos mediante <code class="inline-code">localhost</code>. Sin embargo, el sistema necesita comunicarse con proveedores externos de modelos y Zep Cloud, por lo que no todo el procesamiento queda necesariamente dentro del ordenador.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>7. ¿Por qué necesita servicios o claves de otros proveedores?</summary>
+        <div class="qa-answer">Porque MiroFish utiliza un modelo de lenguaje remoto para generar y razonar y Zep Cloud para funciones de grafo/memoria. Las claves autorizan esas conexiones y pueden implicar costes.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>8. ¿Qué tipo de primera prueba debería hacer?</summary>
+        <div class="qa-answer">Una simulación ficticia, breve y neutral, como la organización de un intercambio de libros. No utilices documentos personales ni temas de alto riesgo.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>9. ¿Para qué sirven Node.js y npm?</summary>
+        <div class="qa-answer">Node.js ejecuta JavaScript fuera del navegador. npm instala las bibliotecas que necesita el frontend y el proceso de desarrollo. MiroFish exige Node 18 o superior.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>10. ¿Por qué MiroFish necesita Python?</summary>
+        <div class="qa-answer">El backend está escrito en Python. Gestiona procesamiento de documentos, servicios de IA, grafos, perfiles, simulación y comunicación con proveedores. El proyecto exige Python 3.11 o 3.12 en la configuración consultada.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>11. ¿Qué es uv y qué hace?</summary>
+        <div class="qa-answer">Es un gestor moderno de paquetes y entornos Python. MiroFish ejecuta <code class="inline-code">uv sync</code> para instalar las dependencias del backend y <code class="inline-code">uv run</code> para lanzar el programa dentro del entorno correspondiente.</div>
+      </details>
+
+      <h3>Nivel 2 — Instalación, uso y comprensión técnica</h3>
+
+      <details class="qa-item">
+        <summary>12. ¿Qué es Git y qué significa clonar un repositorio?</summary>
+        <div class="qa-answer">Git controla versiones de archivos. Clonar descarga el repositorio y su historial a tu ordenador. Así puedes actualizar el código y consultar cambios, a diferencia de descargar solo un ZIP.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>13. ¿Qué es el archivo .env?</summary>
+        <div class="qa-answer">Un archivo de configuración con variables como claves, URL base y nombre del modelo. En MiroFish contiene credenciales sensibles; no debe publicarse ni compartirse.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>14. ¿Qué es una API key y cómo se protege?</summary>
+        <div class="qa-answer">Es una credencial que autoriza a un programa a usar un servicio. Guárdala en <code class="inline-code">.env</code>, limita su uso cuando el proveedor lo permita y revócala si se filtra. Nunca la pegues en una conversación o repositorio público.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>15. ¿Qué significa localhost?</summary>
+        <div class="qa-answer">Es el nombre habitual para referirse al propio ordenador. <code class="inline-code">http://localhost:3000</code> abre la interfaz local si el frontend está funcionando en ese puerto.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>16. ¿Por qué tengo que dejar abierta la terminal?</summary>
+        <div class="qa-answer">Porque <code class="inline-code">npm run dev</code> inicia procesos que permanecen activos mientras la terminal los mantiene en ejecución. Si cierras la ventana, normalmente se detienen frontend y backend.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>17. ¿Cómo detengo, reinicio y actualizo MiroFish sin perder mi configuración?</summary>
+        <div class="qa-answer">Detén con <code class="inline-code">Ctrl+C</code>, conserva <code class="inline-code">.env</code> y <code class="inline-code">backend/uploads</code>, haz una copia de seguridad antes de actualizar y vuelve a arrancar con <code class="inline-code">npm run dev</code>. Para actualizar código clonado, revisa primero los cambios y utiliza <code class="inline-code">git pull</code> solo si comprendes qué versión estás incorporando.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>18. ¿Cómo crea MiroFish los agentes simulados?</summary>
+        <div class="qa-answer">El flujo extrae entidades del grafo y utiliza <code class="inline-code">OasisProfileGenerator</code> para producir perfiles compatibles con OASIS. El perfil contiene atributos como nombre, biografía, profesión y temas de interés. Son representaciones generadas, no personas reales.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>19. ¿Qué papel cumple el material de entrada?</summary>
+        <div class="qa-answer">Aporta el contexto del que se extraen entidades, relaciones y temas. Un documento incompleto o sesgado puede producir agentes y escenarios igualmente incompletos o sesgados.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>20. ¿Qué es un grafo de conocimiento?</summary>
+        <div class="qa-answer">Es una estructura de nodos y conexiones. Por ejemplo, una biblioteca puede relacionarse con un ayuntamiento, un barrio, voluntarios y actividades. Sirve para representar y recuperar relaciones entre elementos.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>21. ¿Qué es GraphRAG y por qué puede ser útil?</summary>
+        <div class="qa-answer">Es una aproximación que combina recuperación de información con grafos de conocimiento. Puede ayudar a recuperar contexto usando relaciones entre entidades, no solo coincidencias de palabras. No garantiza que toda recuperación sea correcta.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>22. ¿Cómo funciona la memoria de los agentes y qué papel puede desempeñar Zep?</summary>
+        <div class="qa-answer">Zep ofrece infraestructura de memoria y grafos que MiroFish utiliza para almacenar y recuperar contexto. El backend también contempla actualizaciones de memoria durante la simulación. Esa memoria es una función de software, no memoria humana ni garantía de recuerdo perfecto.</div>
+      </details>
+
+      <h3>Nivel 3 — Uso profesional, evaluación y responsabilidad avanzada</h3>
+
+      <details class="qa-item">
+        <summary>23. ¿Qué es OASIS y cómo se relaciona con el proyecto?</summary>
+        <div class="qa-answer">OASIS significa Open Agent Social Interaction Simulations. Es el motor de simulación social desarrollado por CAMEL-AI que MiroFish declara utilizar para ejecutar interacciones en plataformas simuladas tipo Twitter y Reddit.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>24. ¿Qué significa que una simulación sea multiagente?</summary>
+        <div class="qa-answer">Que intervienen múltiples agentes que pueden actuar e influirse dentro de un entorno compartido. Las interacciones pueden generar patrones colectivos que no aparecen al estudiar un solo agente aislado.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>25. ¿Cómo interpreto el informe y qué límites tiene?</summary>
+        <div class="qa-answer">Lee el informe como una exploración de escenarios generados por IA. Separa hechos de entrada, acciones simuladas, hipótesis y conclusiones. Contrasta con datos reales y no uses un informe como predicción probada.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>26. ¿Cómo puedo diseñar un experimento o simulación más neutral?</summary>
+        <div class="qa-answer">Formula una pregunta abierta, aporta información equilibrada, incluye actores con perspectivas distintas y solicita explícitamente resultados favorables, contrarios e indiferentes. No ordenes al sistema que confirme una conclusión.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>27. ¿Cómo puedo comparar escenarios sin engañarme con los resultados?</summary>
+        <div class="qa-answer">Modifica una variable cada vez, conserva las demás condiciones, registra prompt y parámetros, repite cuando sea útil y compara patrones. No atribuyas causalidad a una diferencia si cambiaste muchos factores simultáneamente.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>28. ¿Cómo identifico sesgos, falta de datos o falsa precisión?</summary>
+        <div class="qa-answer">Busca voces ausentes, estereotipos, afirmaciones sin fuente, porcentajes sin método y conclusiones demasiado seguras. Pregunta qué evidencia real haría falta para sostener cada afirmación.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>29. ¿Cómo puedo reducir costes sin destruir la utilidad de la simulación?</summary>
+        <div class="qa-answer">Empieza con documentos cortos, menos rondas y perfiles limitados si la interfaz lo permite. Evita ejecuciones repetidas sin una hipótesis nueva. Controla tokens, créditos Zep y facturación; registra qué configuración produjo valor.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>30. ¿Qué información nunca debería subir a MiroFish o a proveedores externos?</summary>
+        <div class="qa-answer">Como regla prudente, no subas contraseñas, claves, documentos de identidad, historiales médicos, datos bancarios, expedientes, información privada de clientes o material confidencial sin autorización y evaluación legal/contractual. Recuerda que el proveedor LLM y Zep son servicios externos.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>31. ¿Cómo puedo evaluar la calidad, consistencia y reproducibilidad de una simulación?</summary>
+        <div class="qa-answer">Guarda documento, fecha, prompt, proveedor, modelo y parámetros. Ejecuta escenarios comparables y analiza si los patrones se mantienen. Comprueba fuentes y supuestos por separado. La repetibilidad de una salida no demuestra que el escenario represente el mundo real.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>32. ¿Puedo usar MiroFish para tomar decisiones reales de negocio, políticas o inversiones? ¿Qué precauciones?</summary>
+        <div class="qa-answer">Puede servir para generar preguntas, explorar riesgos y construir escenarios preliminares, pero no como fundamento único. Contrasta con datos, entrevistas, especialistas y análisis independiente. En inversiones o decisiones que afecten a personas, evita delegar el juicio en un informe generado.</div>
+      </details>
+
+      <details class="qa-item">
+        <summary>33. ¿Qué debería aprender a continuación para convertirme en usuario avanzado de MiroFish?</summary>
+        <div class="qa-answer">Aprende fundamentos de LLM y tokens, APIs, lectura de logs, Python básico, Git, variables de entorno, grafos de conocimiento, RAG, diseño experimental y evaluación de sesgos. Después estudia la arquitectura de MiroFish y la documentación de OASIS/Zep para comprender cómo evolucionan sus componentes.</div>
+      </details>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(7)">← Anterior: Seguridad y Costes</button>
+      <button class="btn-nav-step next" onclick="go(9)">Siguiente: ERRORES →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 9: ERRORES ==================== -->
+  <section class="tab-panel" data-t="ERRORES y Diagnóstico" id="sec-9">
+    <h2 class="section-title">9. Solución de problemas — guía de diagnóstico</h2>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Síntoma</th>
+              <th>Causa probable</th>
+              <th>Cómo comprobarlo</th>
+              <th>Solución y verificación</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline-code">node</code> no se reconoce</td>
+              <td>Node no instalado o PATH no actualizado</td>
+              <td><code class="inline-code">node -v</code></td>
+              <td>Reabre PowerShell; revisa instalación y PATH; comprueba de nuevo</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">npm</code> no se reconoce</td>
+              <td>Instalación Node incompleta o PATH</td>
+              <td><code class="inline-code">npm -v</code></td>
+              <td>Repara instalación oficial de Node; abre terminal nueva</td>
+            </tr>
+            <tr>
+              <td>Python incorrecto</td>
+              <td>Se está usando 3.13+ o instalación distinta</td>
+              <td><code class="inline-code">python --version</code> y <code class="inline-code">py -0p</code></td>
+              <td>Instala 3.11/3.12 y confirma la versión seleccionada</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">uv</code> no se reconoce</td>
+              <td>PATH no actualizado</td>
+              <td><code class="inline-code">uv --version</code></td>
+              <td>Cierra y abre PowerShell; revisa instalación oficial y PATH</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">git</code> no se reconoce</td>
+              <td>Git no instalado o terminal antigua</td>
+              <td><code class="inline-code">git --version</code></td>
+              <td>Instala Git for Windows y abre terminal nueva</td>
+            </tr>
+            <tr>
+              <td>Instalación de paquetes falla</td>
+              <td>Red, permisos, versión o paquete</td>
+              <td>Lee las últimas líneas del error</td>
+              <td>Comprueba conexión y versiones; corrige la causa; repite el comando</td>
+            </tr>
+            <tr>
+              <td>Terminal en carpeta equivocada</td>
+              <td>No estás en raíz del proyecto</td>
+              <td><code class="inline-code">Get-Location</code> y <code class="inline-code">Get-ChildItem</code></td>
+              <td>Ejecuta <code class="inline-code">cd C:\IA\MiroFish</code>; verifica <code class="inline-code">package.json</code></td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">.env</code> ausente</td>
+              <td>No se copió el ejemplo o nombre incorrecto</td>
+              <td><code class="inline-code">Get-ChildItem -Force .env*</code></td>
+              <td><code class="inline-code">Copy-Item .env.example .env</code>; revisa extensión</td>
+            </tr>
+            <tr>
+              <td>API key inválida</td>
+              <td>Clave incorrecta, revocada o espacio sobrante</td>
+              <td>Revisa cuenta/proveedor y logs sin mostrar la clave</td>
+              <td>Genera clave nueva si procede y edita <code class="inline-code">.env</code> localmente</td>
+            </tr>
+            <tr>
+              <td>Endpoint/modelo incorrecto</td>
+              <td>URL regional o nombre no coincide</td>
+              <td>Contrasta panel y documentación del proveedor</td>
+              <td>Corrige <code class="inline-code">LLM_BASE_URL</code> y <code class="inline-code">LLM_MODEL_NAME</code></td>
+            </tr>
+            <tr>
+              <td>Cuota agotada</td>
+              <td>Límite o facturación del proveedor</td>
+              <td>Panel de uso/facturación</td>
+              <td>Reduce consumo, revisa límites o espera renovación</td>
+            </tr>
+            <tr>
+              <td>Zep no conecta</td>
+              <td>Clave errónea, cuenta o servicio externo</td>
+              <td>Revisa estado de Zep y logs</td>
+              <td>Verifica <code class="inline-code">ZEP_API_KEY</code>, cuenta y servicio; no inventes URL de Zep</td>
+            </tr>
+            <tr>
+              <td>Puerto ocupado</td>
+              <td>Otra aplicación usa 3000/5001</td>
+              <td><code class="inline-code">Get-NetTCPConnection -LocalPort 3000,5001 -State Listen</code></td>
+              <td>Identifica el proceso antes de detenerlo; no mates procesos desconocidos</td>
+            </tr>
+            <tr>
+              <td>Frontend abre pero backend no responde</td>
+              <td>Backend detenido o error de configuración</td>
+              <td>Observa la salida de la terminal</td>
+              <td>Revisa logs backend y <code class="inline-code">.env</code>; reinicia tras corregir</td>
+            </tr>
+            <tr>
+              <td><code class="inline-code">localhost</code> no conecta</td>
+              <td>Servicio parado, puerto distinto o firewall</td>
+              <td>Comprueba terminal y puertos</td>
+              <td>Usa URL indicada por README y revisa estado de ambos procesos</td>
+            </tr>
+            <tr>
+              <td>Docker no arranca</td>
+              <td>WSL2, virtualización o motor apagado</td>
+              <td>Docker Desktop y <code class="inline-code">wsl --status</code></td>
+              <td>Sigue la guía oficial de Docker/WSL y reinicia si se solicita</td>
+            </tr>
+            <tr>
+              <td>Contenedor detenido</td>
+              <td>Error de configuración o arranque</td>
+              <td><code class="inline-code">docker compose ps</code> y <code class="inline-code">docker compose logs --tail 100</code></td>
+              <td>Corrige el error descrito en logs y ejecuta <code class="inline-code">docker compose up -d</code></td>
+            </tr>
+            <tr>
+              <td>Parece bloqueado</td>
+              <td>Descarga lenta, compilación o llamada externa</td>
+              <td>Observa si cambian logs, CPU o red</td>
+              <td>Espera un tiempo razonable; diagnostica el último paso visible; no cierres procesos arbitrariamente</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Comandos útiles de diagnóstico en PowerShell</h3>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>PowerShell — Batería completa de diagnóstico</span><button class="btn-copy" data-copy="Get-Location&#10;Get-ChildItem -Force&#10;node -v&#10;npm -v&#10;python --version&#10;py -0p&#10;uv --version&#10;git --version&#10;Get-NetTCPConnection -LocalPort 3000,5001 -State Listen">COPIAR</button></div>
+        <pre class="code-content">Get-Location
+Get-ChildItem -Force
+node -v
+npm -v
+python --version
+py -0p
+uv --version
+git --version
+Get-NetTCPConnection -LocalPort 3000,5001 -State Listen</pre>
+      </div>
+      <p style="margin-bottom:0;"><em>No publiques capturas de errores sin ocultar claves, tokens, rutas privadas y datos personales.</em></p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(8)">← Anterior: 33 Preguntas (Q&amp;A)</button>
+      <button class="btn-nav-step next" onclick="go(10)">Siguiente: PROMPTS →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 10: PROMPTS ==================== -->
+  <section class="tab-panel" data-t="PROMPTS Reutilizables" id="sec-10">
+    <h2 class="section-title">Repositorio Central de Prompts y Plantillas</h2>
+    <p>Aquí tienes reunidos todos los prompts y plantillas del tutorial listos para copiar con un clic, junto con la descripción exacta de dónde y cómo emplearlos.</p>
+
+    <div class="card">
+      <h3>Prompt 1: Simulación Guiada (Biblioteca de Barrio)</h3>
+      <p><strong>Dónde se emplea:</strong> En la fase inicial de creación de proyecto en MiroFish (<code class="inline-code">http://localhost:3000</code>), tras subir el documento semilla <code class="inline-code">biblioteca_intercambio.txt</code>.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Prompt 1 — Exploración neutral comunitaria</span><button class="btn-copy" data-copy="Explora posibles reacciones ante la propuesta ficticia de organizar&#10;una tarde mensual de intercambio gratuito de libros en una biblioteca&#10;de barrio.&#10;&#10;Considera perfiles diversos: personas que leen con frecuencia,&#10;familias, estudiantes, personas mayores, voluntarios y vecinos que&#10;apenas utilizan la biblioteca.&#10;&#10;No presupongas que la propuesta tendrá éxito. Representa tanto&#10;reacciones favorables como dudas, objeciones y falta de interés.&#10;&#10;Identifica posibles obstáculos de horario, accesibilidad, espacio,&#10;organización y comunicación.&#10;&#10;Distingue hechos presentes en el documento de hipótesis generadas&#10;por la simulación. No inventes encuestas ni datos reales.&#10;El objetivo es explorar escenarios, no predecir el comportamiento&#10;de los vecinos reales.">COPIAR</button></div>
+        <pre class="code-content">Explora posibles reacciones ante la propuesta ficticia de organizar
+una tarde mensual de intercambio gratuito de libros en una biblioteca
+de barrio.
+
+Considera perfiles diversos: personas que leen con frecuencia,
+familias, estudiantes, personas mayores, voluntarios y vecinos que
+apenas utilizan la biblioteca.
+
+No presupongas que la propuesta tendrá éxito. Representa tanto
+reacciones favorables como dudas, objeciones y falta de interés.
+
+Identifica posibles obstáculos de horario, accesibilidad, espacio,
+organización y comunicación.
+
+Distingue hechos presentes en el documento de hipótesis generadas
+por la simulación. No inventes encuestas ni datos reales.
+El objetivo es explorar escenarios, no predecir el comportamiento
+de los vecinos reales.</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Prompt 2: Prompt Mejorado Anti-Sesgo</h3>
+      <p><strong>Dónde se emplea:</strong> Como sustituto de instrucciones sesgadas o dirigidas (como «Demuestra que será un éxito») en cualquier consulta de simulación o conversación posterior con <code class="inline-code">ReportAgent</code>.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Prompt 2 — Evaluación equilibrada</span><button class="btn-copy" data-copy="Explora reacciones diversas ante la propuesta. Incluye apoyo, indiferencia, objeciones y alternativas. Explica qué aspectos dependen de supuestos no comprobados y qué información real haría falta para evaluar la viabilidad.">COPIAR</button></div>
+        <pre class="code-content">Explora reacciones diversas ante la propuesta. Incluye apoyo, indiferencia, objeciones y alternativas. Explica qué aspectos dependen de supuestos no comprobados y qué información real haría falta para evaluar la viabilidad.</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Prompt 3: Plantilla Maestra Reutilizable de Simulación</h3>
+      <p><strong>Dónde se emplea:</strong> Para diseñar simulaciones comparativas profesionales (Escenario A frente a Escenario B) manteniendo una sola variable modificada cada vez.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Prompt 3 — Estructura estándar A/B</span><button class="btn-copy" data-copy="OBJETIVO&#10;Quiero explorar [pregunta concreta].&#10;&#10;CONTEXTO&#10;Utiliza únicamente como información de partida [documentos].&#10;&#10;ACTORES&#10;Considera [grupos o perfiles], incluyendo diversidad de opiniones&#10;y personas que no participen.&#10;&#10;ESCENARIOS&#10;Compara [escenario A] con [escenario B], manteniendo constantes&#10;las demás condiciones siempre que sea posible.&#10;&#10;NEUTRALIDAD&#10;No presupongas que un escenario es mejor. Incluye respuestas&#10;favorables, desfavorables, indiferentes e inesperadas.&#10;&#10;LÍMITES&#10;No inventes estadísticas ni hechos externos. Señala los supuestos.&#10;&#10;RESULTADO&#10;Resume patrones observados, diferencias entre escenarios,&#10;incertidumbres, explicaciones alternativas y datos reales que&#10;deberían recopilarse antes de tomar una decisión.">COPIAR</button></div>
+        <pre class="code-content">OBJETIVO
+Quiero explorar [pregunta concreta].
+
+CONTEXTO
+Utiliza únicamente como información de partida [documentos].
+
+ACTORES
+Considera [grupos o perfiles], incluyendo diversidad de opiniones
+y personas que no participen.
+
+ESCENARIOS
+Compara [escenario A] con [escenario B], manteniendo constantes
+las demás condiciones siempre que sea posible.
+
+NEUTRALIDAD
+No presupongas que un escenario es mejor. Incluye respuestas
+favorables, desfavorables, indiferentes e inesperadas.
+
+LÍMITES
+No inventes estadísticas ni hechos externos. Señala los supuestos.
+
+RESULTADO
+Resume patrones observados, diferencias entre escenarios,
+incertidumbres, explicaciones alternativas y datos reales que
+deberían recopilarse antes de tomar una decisión.</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Prompt 4: Documento Semilla de Prueba (<code class="inline-code">biblioteca_intercambio.txt</code>)</h3>
+      <p><strong>Dónde se emplea:</strong> Archivo de texto plano (<code class="inline-code">.txt</code>) que se sube en el Paso 1 (<code class="inline-code">Graph Building</code>) para alimentar la ontología y los perfiles de agentes.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Texto Semilla — Biblioteca de Barrio</span><button class="btn-copy" data-copy="PROYECTO FICTICIO: TARDE DE INTERCAMBIO DE LIBROS&#10;&#10;Una biblioteca de barrio estudia organizar una tarde mensual&#10;de intercambio gratuito de libros.&#10;&#10;La actividad se celebraría un sábado por la tarde.&#10;Las personas podrían llevar libros en buen estado y llevarse&#10;otros a cambio, sin obligación de intercambiar uno por uno.&#10;&#10;La biblioteca dispone de una sala pequeña y de dos voluntarios.&#10;No se ha realizado todavía ninguna encuesta a los vecinos.&#10;&#10;Preguntas abiertas:&#10;- ¿Qué horarios podrían resultar cómodos?&#10;- ¿Qué dificultades logísticas pueden aparecer?&#10;- ¿Cómo se podría informar a los vecinos?&#10;- ¿Qué perfiles podrían apoyar o no participar?&#10;- ¿Qué cambios sencillos harían la actividad más accesible?&#10;&#10;Este documento es ficticio y no contiene datos personales.">COPIAR</button></div>
+        <pre class="code-content">PROYECTO FICTICIO: TARDE DE INTERCAMBIO DE LIBROS
+
+Una biblioteca de barrio estudia organizar una tarde mensual
+de intercambio gratuito de libros.
+
+La actividad se celebraría un sábado por la tarde.
+Las personas podrían llevar libros en buen estado y llevarse
+otros a cambio, sin obligación de intercambiar uno por uno.
+
+La biblioteca dispone de una sala pequeña y de dos voluntarios.
+No se ha realizado todavía ninguna encuesta a los vecinos.
+
+Preguntas abiertas:
+- ¿Qué horarios podrían resultar cómodos?
+- ¿Qué dificultades logísticas pueden aparecer?
+- ¿Cómo se podría informar a los vecinos?
+- ¿Qué perfiles podrían apoyar o no participar?
+- ¿Qué cambios sencillos harían la actividad más accesible?
+
+Este documento es ficticio y no contiene datos personales.</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Prompt 5: Ficha de Bitácora y Preparación Experimental</h3>
+      <p><strong>Dónde se emplea:</strong> Antes y después de cada simulación para documentar variables, supuestos y contraste externo fuera de MiroFish.</p>
+      <div class="code-block-wrap">
+        <div class="code-header"><span>Ficha Técnica de Registro</span><button class="btn-copy" data-copy="TÍTULO:&#10;FECHA:&#10;OBJETIVO:&#10;PREGUNTA PRINCIPAL:&#10;TIPO DE SIMULACIÓN: exploratoria / narrativa / planificación&#10;DOCUMENTOS DE PARTIDA:&#10;FUENTES Y FECHAS:&#10;HECHOS CONFIRMADOS:&#10;DATOS QUE FALTAN:&#10;ACTORES A REPRESENTAR:&#10;VARIABLES:&#10;SUPUESTOS:&#10;ESCENARIO A:&#10;ESCENARIO B:&#10;LÍMITES DE LA SIMULACIÓN:&#10;RIESGOS DE SESGO:&#10;CRITERIOS PARA EVALUAR RESULTADOS:&#10;CÓMO SE CONTRASTARÁN FUERA DE MIROFISH:">COPIAR</button></div>
+        <pre class="code-content">TÍTULO:
+FECHA:
+OBJETIVO:
+PREGUNTA PRINCIPAL:
+TIPO DE SIMULACIÓN: exploratoria / narrativa / planificación
+DOCUMENTOS DE PARTIDA:
+FUENTES Y FECHAS:
+HECHOS CONFIRMADOS:
+DATOS QUE FALTAN:
+ACTORES A REPRESENTAR:
+VARIABLES:
+SUPUESTOS:
+ESCENARIO A:
+ESCENARIO B:
+LÍMITES DE LA SIMULACIÓN:
+RIESGOS DE SESGO:
+CRITERIOS PARA EVALUAR RESULTADOS:
+CÓMO SE CONTRASTARÁN FUERA DE MIROFISH:</pre>
+      </div>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(9)">← Anterior: ERRORES</button>
+      <button class="btn-nav-step next" onclick="go(11)">Siguiente: 10 Casos Prácticos →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 11: 10 CASOS PRÁCTICOS ==================== -->
+  <section class="tab-panel" data-t="10 Casos Prácticos" id="sec-11">
+    <h2 class="section-title">10 Casos Prácticos de Uso Exploratorio en MiroFish</h2>
+    <p>Aplicaciones reales y seguras basadas exclusivamente en las capacidades verificadas de MiroFish (exploración de hipótesis, dinámicas sociales simuladas y contraste crítico sin sustituir datos reales):</p>
+
+    <div class="card">
+      <h3>Caso 1: Actividad comunitaria en biblioteca de barrio</h3>
+      <p><strong>Documento semilla:</strong> Propuesta de tarde mensual de intercambio gratuito de libros con sala pequeña y dos voluntarios (<code class="inline-code">.txt</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Detectar objeciones logísticas, barreras de horario y canales de comunicación entre lectores habituales, familias y personas mayores antes de lanzar una encuesta real.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 2: Recepción de una normativa interna de teletrabajo híbrido</h3>
+      <p><strong>Documento semilla:</strong> Borrador ficticio de política de asistencia presencial dos días por semana (<code class="inline-code">.md</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Observar fricciones potenciales entre perfiles junior, mandos intermedios y personal con cargas familiares en un foro simulado tipo Reddit.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 3: Impacto comunicativo de un cambio de horario comercial</h3>
+      <p><strong>Documento semilla:</strong> Comunicado hipotético de un pequeño comercio que cierra los sábados por la tarde (<code class="inline-code">.txt</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Identificar qué preguntas frecuentes y malentendidos surgen en los primeros hilos de conversación simulados para redactar mejores carteles informativos.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 4: Evolución de una trama narrativa o novela coral</h3>
+      <p><strong>Documento semilla:</strong> Sinopsis de personajes, facciones y un evento detonante en una ciudad ficticia (<code class="inline-code">.md</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Explorar cómo reaccionan los distintos personajes entre sí y qué rumores o alianzas emergen espontáneamente durante 10 rondas de interacción.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 5: Propagación de un rumor ficticio en redes sociales</h3>
+      <p><strong>Documento semilla:</strong> Nota de prensa ambigua sobre la reforma de un parque urbano ficticio (<code class="inline-code">.txt</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Analizar en las plataformas simuladas tipo Twitter y Reddit qué frases del texto original generan mayor distorsión o interpretación errónea.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 6: Diseño de programa para un evento educativo gratuito</h3>
+      <p><strong>Documento semilla:</strong> Borrador de talleres tecnológicos para principiantes en un centro cívico (<code class="inline-code">.pdf</code> sin datos personales).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Comparar el Escenario A (talleres de mañana) frente al Escenario B (talleres de tarde) modificando únicamente la variable horaria.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 7: Evaluación previa de claridad en instrucciones de uso</h3>
+      <p><strong>Documento semilla:</strong> Guía rápida de reciclaje de residuos electrónicos en una comunidad de vecinos (<code class="inline-code">.txt</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Detectar dudas recurrentes sobre qué objetos se aceptan y dónde depositarlos mediante la interacción posterior (<code class="inline-code">Deep Interaction</code>) con agentes vecinos.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 8: Debate simulado sobre peatonalización de una calle comercial</h3>
+      <p><strong>Documento semilla:</strong> Resumen neutro con argumentos a favor y en contra de peatonalizar una vía céntrica (<code class="inline-code">.md</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Mapear argumentos de comerciantes, repartidores, peatones y residentes para preparar una mesa de diálogo real equilibrada.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 9: Lanzamiento de un curso abierto de software libre</h3>
+      <p><strong>Documento semilla:</strong> Temario preliminar y requisitos técnicos de un taller de introducción a Python (<code class="inline-code">.md</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Identificar qué términos técnicos intimidan a los perfiles principiantes simulados para añadir un glosario introductorio.</p>
+    </div>
+
+    <div class="card">
+      <h3>Caso 10: Auditoría de sesgos en un documento de propuesta</h3>
+      <p><strong>Documento semilla:</strong> Borrador inicial redactado por un único equipo de trabajo (<code class="inline-code">.txt</code>).</p>
+      <p style="margin-bottom:0;"><strong>Objetivo:</strong> Utilizar <code class="inline-code">ReportAgent</code> para señalar qué colectivos o perspectivas quedaron ausentes en el documento original.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(10)">← Anterior: PROMPTS</button>
+      <button class="btn-nav-step next" onclick="go(12)">Siguiente: 10 Proyectos →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 12: 10 PROYECTOS ==================== -->
+  <section class="tab-panel" data-t="10 Proyectos" id="sec-12">
+    <h2 class="section-title">10 Proyectos Prácticos Progresivos para Dominar MiroFish</h2>
+    <p>Itinerario estructurado de ejercicios prácticos para consolidar el aprendizaje técnico y metodológico sin disparar costes de API:</p>
+
+    <div class="card">
+      <h3>Proyecto 1: Primera ejecución limpia y control de costes</h3>
+      <p><strong>Meta:</strong> Ejecutar el caso de la biblioteca de barrio con menos de 10 rondas, verificar el gasto exacto en el panel de tu proveedor LLM y en Zep Cloud, y clasificar 10 afirmaciones del informe en hechos, observaciones e hipótesis.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 2: Experimento controlado A/B de una sola variable</h3>
+      <p><strong>Meta:</strong> Duplicar el archivo <code class="inline-code">biblioteca_intercambio.txt</code> cambiando exclusivamente el día de celebración (de sábado tarde a miércoles mañana). Ejecutar ambos escenarios y comparar los informes generados.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 3: Detección y corrección de prompt sesgado</h3>
+      <p><strong>Meta:</strong> Ejecutar una simulación corta con un prompt inductor y otra con un prompt neutral utilizando exactamente el mismo documento semilla. Documentar cómo cambia el tono de los perfiles generados en <code class="inline-code">Step2EnvSetup</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 4: Entrevista profunda con agentes simulados (<code class="inline-code">Deep Interaction</code>)</h3>
+      <p><strong>Meta:</strong> Al finalizar una simulación, seleccionar tres perfiles con posturas opuestas y formularles las mismas tres preguntas abiertas para analizar la coherencia de su memoria en Zep.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 5: Auditoría de archivo <code class="inline-code">.env</code> y seguridad en Git</h3>
+      <p><strong>Meta:</strong> Verificar mediante PowerShell (<code class="inline-code">git status</code> y <code class="inline-code">git check-ignore .env</code>) que ninguna credencial ni carpeta <code class="inline-code">backend/uploads</code> queda expuesta, y crear un protocolo local de respaldo cifrado.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 6: Comparativa de formatos de entrada (<code class="inline-code">.txt</code> vs <code class="inline-code">.md</code>)</h3>
+      <p><strong>Meta:</strong> Estructurar un mismo caso ficticio en texto plano y en Markdown con encabezados claros, observando si la extracción de entidades y relaciones en <code class="inline-code">GraphBuilderService</code> mejora su precisión.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 7: Bitácora reproducible de experimentos</h3>
+      <p><strong>Meta:</strong> Completar la plantilla de preparación de la sección 7.2 para tres simulaciones distintas, archivando fecha, modelo exacto, número de rondas, prompt y conclusión de contraste externo.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 8: Despliegue alternativo con Docker Compose</h3>
+      <p><strong>Meta:</strong> Detener la instalación local en código fuente, configurar Docker Desktop con WSL 2, levantar MiroFish con <code class="inline-code">docker compose up -d</code> e inspeccionar los registros en tiempo real con <code class="inline-code">docker compose logs -f</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 9: Simulación narrativa con giro argumental</h3>
+      <p><strong>Meta:</strong> Redactar un documento de 300 palabras con cuatro personajes ficticios y observar cómo interactúan en el entorno OASIS simulado, utilizando <code class="inline-code">ReportAgent</code> para resumir los puntos de inflexión.</p>
+    </div>
+
+    <div class="card">
+      <h3>Proyecto 10: Diseño de encuesta real a partir de hipótesis simuladas</h3>
+      <p><strong>Meta:</strong> Tomar las 5 objeciones principales surgidas en una simulación exploratoria y transformarlas en un cuestionario de 5 preguntas cerradas para validarlas con personas reales fuera de MiroFish.</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(11)">← Anterior: 10 Casos Prácticos</button>
+      <button class="btn-nav-step next" onclick="go(13)">Siguiente: Glosario →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 13: GLOSARIO ==================== -->
+  <section class="tab-panel" data-t="Glosario Completo" id="sec-13">
+    <h2 class="section-title">11. Glosario completo — acrónimos, siglas y términos técnicos</h2>
+    <p><strong>A continuación se explican los términos técnicos principales utilizados en el tutorial, los comandos y los componentes del repositorio.</strong> El repositorio evoluciona: si una versión nueva introduce nombres o componentes adicionales, consulta su documentación.</p>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Término / Sigla</th>
+              <th>Definición clara y contexto en MiroFish</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>AGPL-3.0</strong></td><td>Licencia GNU Affero General Public License versión 3. Licencia de software libre con obligaciones de copyleft, incluidas condiciones específicas para ciertos usos a través de red.</td></tr>
+            <tr><td><strong>Agente (Agent)</strong></td><td>Unidad de software que utiliza un modelo para elegir acciones dentro de reglas y contexto.</td></tr>
+            <tr><td><strong>Agente social (Social Agent)</strong></td><td>Agente de IA que simula un usuario de una plataforma social.</td></tr>
+            <tr><td><strong>API</strong></td><td>Interfaz de programación de aplicaciones; permite que dos programas se comuniquen.</td></tr>
+            <tr><td><strong>API key</strong></td><td>Clave privada que autoriza llamadas a un servicio.</td></tr>
+            <tr><td><strong>Backend</strong></td><td>Parte del programa que procesa datos y ejecuta la lógica del servidor.</td></tr>
+            <tr><td><strong>Bash</strong></td><td>Intérprete de comandos habitual en Linux y macOS; no es la terminal usada en los pasos principales de Windows.</td></tr>
+            <tr><td><strong>CAMEL-AI</strong></td><td>Equipo/proyecto de código abierto que desarrolla herramientas y OASIS.</td></tr>
+            <tr><td><strong>Chunk / fragmento</strong></td><td>Porción de texto en la que se divide un documento para procesarlo.</td></tr>
+            <tr><td><strong>CLI</strong></td><td>Command Line Interface; interfaz de línea de comandos.</td></tr>
+            <tr><td><strong>Clonar (clone)</strong></td><td>Descargar un repositorio Git con su historial.</td></tr>
+            <tr><td><strong>CMD</strong></td><td>Símbolo del sistema de Windows; distinto de PowerShell.</td></tr>
+            <tr><td><strong>Contenedor</strong></td><td>Entorno empaquetado en el que se ejecuta una aplicación.</td></tr>
+            <tr><td><strong>Credencial</strong></td><td>Dato secreto que permite acceder a un servicio.</td></tr>
+            <tr><td><strong>Dependencia</strong></td><td>Paquete o biblioteca que un programa necesita.</td></tr>
+            <tr><td><strong>Endpoint</strong></td><td>Dirección de red de un servicio o función de una API.</td></tr>
+            <tr><td><strong>Entidad (Entity)</strong></td><td>Elemento identificado en el material, como persona, organización o concepto.</td></tr>
+            <tr><td><strong>Entorno (Environment)</strong></td><td>Contexto y reglas donde interactúan los agentes.</td></tr>
+            <tr><td><strong>Frontend</strong></td><td>Interfaz visible con la que interactúa el usuario.</td></tr>
+            <tr><td><strong>Git</strong></td><td>Sistema de control de versiones.</td></tr>
+            <tr><td><strong>GitHub</strong></td><td>Plataforma para alojar repositorios Git.</td></tr>
+            <tr><td><strong>Grafo (Graph)</strong></td><td>Estructura formada por nodos y conexiones.</td></tr>
+            <tr><td><strong>Grafo de conocimiento (Knowledge Graph)</strong></td><td>Grafo cuyos nodos representan entidades y cuyas conexiones representan relaciones con significado.</td></tr>
+            <tr><td><strong>Graph Building</strong></td><td>Etapa de MiroFish que construye el grafo a partir del material de entrada.</td></tr>
+            <tr><td><strong>GraphRAG</strong></td><td>Graph Retrieval-Augmented Generation; recuperación aumentada mediante información y relaciones de un grafo.</td></tr>
+            <tr><td><strong>Host</strong></td><td>Equipo o dirección donde se ejecuta un servicio.</td></tr>
+            <tr><td><strong>HTTP</strong></td><td>Protocolo utilizado para transferir información en la web.</td></tr>
+            <tr><td><strong>JSON</strong></td><td>Formato de texto estructurado para intercambiar datos.</td></tr>
+            <tr><td><strong>LLM</strong></td><td>Large Language Model; modelo de lenguaje grande.</td></tr>
+            <tr><td><strong>LLM_API_KEY</strong></td><td>Variable de entorno con la clave del proveedor de modelos.</td></tr>
+            <tr><td><strong>LLM_BASE_URL</strong></td><td>Variable con la dirección base del endpoint compatible.</td></tr>
+            <tr><td><strong>LLM_MODEL_NAME</strong></td><td>Variable con el identificador del modelo.</td></tr>
+            <tr><td><strong>Localhost</strong></td><td>Nombre que apunta al propio equipo.</td></tr>
+            <tr><td><strong>Log / registro</strong></td><td>Mensaje que documenta actividad, estado o error de un programa.</td></tr>
+            <tr><td><strong>Markdown (MD)</strong></td><td>Formato de texto ligero con títulos, listas, enlaces y bloques de código.</td></tr>
+            <tr><td><strong>Memoria</strong></td><td>Datos y contexto almacenados para recuperarse en interacciones posteriores.</td></tr>
+            <tr><td><strong>Modelo de lenguaje (Language Model)</strong></td><td>Sistema entrenado para procesar y generar lenguaje.</td></tr>
+            <tr><td><strong>Multiagente (Multi-agent)</strong></td><td>Sistema en el que varios agentes interactúan.</td></tr>
+            <tr><td><strong>Navegador</strong></td><td>Programa para abrir páginas web, como Edge o Chrome.</td></tr>
+            <tr><td><strong>Node.js</strong></td><td>Entorno para ejecutar JavaScript fuera del navegador.</td></tr>
+            <tr><td><strong>Nodo (Node)</strong></td><td>Elemento individual de un grafo.</td></tr>
+            <tr><td><strong>npm</strong></td><td>Gestor de paquetes de Node.js.</td></tr>
+            <tr><td><strong>OASIS</strong></td><td>Open Agent Social Interaction Simulations; simulador social utilizado por MiroFish.</td></tr>
+            <tr><td><strong>Ontología (Ontology)</strong></td><td>Definición de tipos de entidades, atributos y relaciones que se utilizarán para organizar conocimiento.</td></tr>
+            <tr><td><strong>Paquete (Package)</strong></td><td>Unidad de software distribuida para instalarse y reutilizarse.</td></tr>
+            <tr><td><strong>PATH</strong></td><td>Variable del sistema que indica dónde buscar programas ejecutables.</td></tr>
+            <tr><td><strong>PDF</strong></td><td>Portable Document Format; formato de documento.</td></tr>
+            <tr><td><strong>Perfil (Profile / Persona)</strong></td><td>Descripción de un agente simulado.</td></tr>
+            <tr><td><strong>PowerShell</strong></td><td>Terminal y lenguaje de automatización de Windows; es la consola indicada en los pasos.</td></tr>
+            <tr><td><strong>Prompt</strong></td><td>Instrucción en lenguaje natural enviada a un modelo de IA.</td></tr>
+            <tr><td><strong>Puerto (Port)</strong></td><td>Número que identifica un servicio de red dentro de un equipo.</td></tr>
+            <tr><td><strong>Python</strong></td><td>Lenguaje de programación utilizado por el backend de MiroFish.</td></tr>
+            <tr><td><strong>RAG</strong></td><td>Retrieval-Augmented Generation; generación aumentada mediante recuperación de información.</td></tr>
+            <tr><td><strong>RAM</strong></td><td>Random Access Memory; memoria de trabajo del ordenador.</td></tr>
+            <tr><td><strong>Reddit</strong></td><td>Plataforma social cuyo estilo de interacción se simula mediante OASIS.</td></tr>
+            <tr><td><strong>Repositorio (Repository)</strong></td><td>Carpeta/proyecto con archivos y, en Git, historial de versiones.</td></tr>
+            <tr><td><strong>ReportAgent</strong></td><td>Componente de MiroFish que genera informes y permite interacción posterior con el contexto de simulación.</td></tr>
+            <tr><td><strong>Ronda (Round)</strong></td><td>Paso temporal o ciclo de acciones dentro de la simulación.</td></tr>
+            <tr><td><strong>SDK</strong></td><td>Software Development Kit; conjunto de herramientas para utilizar un servicio desde un lenguaje.</td></tr>
+            <tr><td><strong>Servicio externo</strong></td><td>Programa que se ejecuta fuera del ordenador del usuario y al que se conecta por red.</td></tr>
+            <tr><td><strong>Simulación basada en agentes</strong></td><td>Modelo que estudia un sistema a partir de agentes individuales e interacciones.</td></tr>
+            <tr><td><strong>Token</strong></td><td>Unidad de texto que utiliza un modelo para procesar entradas y salidas; influye en el coste.</td></tr>
+            <tr><td><strong>Twitter / X</strong></td><td>Plataforma social cuyo estilo de interacción es representado en el entorno simulado.</td></tr>
+            <tr><td><strong>uv</strong></td><td>Gestor de paquetes, entornos y herramientas Python utilizado por el backend.</td></tr>
+            <tr><td><strong>Variable de entorno</strong></td><td>Valor de configuración disponible para un programa durante su ejecución.</td></tr>
+            <tr><td><strong>Vite</strong></td><td>Herramienta de desarrollo y compilación utilizada por el frontend.</td></tr>
+            <tr><td><strong>WSL 2</strong></td><td>Windows Subsystem for Linux versión 2; permite ejecutar un entorno Linux en Windows.</td></tr>
+            <tr><td><strong>Zep Cloud</strong></td><td>Servicio externo de memoria y grafos utilizado por MiroFish.</td></tr>
+            <tr><td><strong>ZEP_API_KEY</strong></td><td>Variable de entorno con la credencial de Zep.</td></tr>
+            <tr><td><code class="inline-code">.env</code></td><td>Archivo de configuración que contiene variables, incluidas credenciales.</td></tr>
+            <tr><td><code class="inline-code">.env.example</code></td><td>Archivo de ejemplo que indica las variables que se deben configurar.</td></tr>
+            <tr><td><code class="inline-code">.gitignore</code></td><td>Archivo que indica a Git qué archivos o carpetas debe ignorar.</td></tr>
+            <tr><td><code class="inline-code">backend/</code></td><td>Carpeta con el servidor y lógica Python de MiroFish.</td></tr>
+            <tr><td><code class="inline-code">frontend/</code></td><td>Carpeta con la interfaz web.</td></tr>
+            <tr><td><code class="inline-code">localhost:3000</code></td><td>Dirección local documentada para abrir el frontend.</td></tr>
+            <tr><td><code class="inline-code">localhost:5001</code></td><td>Dirección local documentada para el backend API.</td></tr>
+            <tr><td><code class="inline-code">npm run dev</code></td><td>Comando del proyecto que inicia backend y frontend a la vez.</td></tr>
+            <tr><td><code class="inline-code">npm run setup:all</code></td><td>Comando que instala dependencias de raíz, frontend y backend.</td></tr>
+            <tr><td><code class="inline-code">uv sync</code></td><td>Comando que sincroniza las dependencias Python del proyecto.</td></tr>
+            <tr><td><code class="inline-code">docker compose</code></td><td>Herramienta para definir y ejecutar aplicaciones compuestas por contenedores.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(12)">← Anterior: 10 Proyectos</button>
+      <button class="btn-nav-step next" onclick="go(14)">Siguiente: Checklist →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 14: CHECKLIST ==================== -->
+  <section class="tab-panel" data-t="Checklist Final" id="sec-14">
+    <h2 class="section-title">12. Checklist final — MiroFish funciona</h2>
+
+    <div class="card">
+      <div id="checklist-final">
+        <label class="checklist-item"><input type="checkbox" data-chk="fin1"><span>Node.js y npm instalados y comprobados.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin2"><span>Python 3.11 o 3.12 instalado y comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin3"><span>uv instalado y comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin4"><span>Git instalado y comprobado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin5"><span>Repositorio oficial descargado.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin6"><span>Estoy en la carpeta raíz correcta.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin7"><span>.env creado a partir de .env.example.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin8"><span>API key del proveedor LLM configurada.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin9"><span>URL base y nombre del modelo verificados.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin10"><span>ZEP_API_KEY configurada.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin11"><span>.env está ignorado por Git.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin12"><span>Dependencias instaladas con npm run setup:all.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin13"><span>Backend y frontend arrancados.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin14"><span>Interfaz abierta en http://localhost:3000.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin15"><span>Primera simulación neutral y pequeña ejecutada.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin16"><span>Resultados separados entre hechos, observaciones e hipótesis.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin17"><span>Costes y consumo revisados.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin18"><span>Servicios detenidos correctamente.</span></label>
+        <label class="checklist-item"><input type="checkbox" data-chk="fin19"><span>Copia de seguridad de .env y backend/uploads protegida.</span></label>
+      </div>
+
+      <h3>Si llegaste hasta aquí</h3>
+      <p>Has aprendido a preparar Windows 11, instalar Node.js, Python, uv y Git, configurar servicios externos, iniciar MiroFish, comprender su arquitectura y diseñar una primera simulación. También sabes que una simulación multiagente no es una predicción infalible.</p>
+      <h4>Itinerario siguiente</h4>
+      <ol>
+        <li>Repetir el ejercicio con otro documento ficticio y comparar resultados.</li>
+        <li>Aprender a leer los registros de backend y frontend.</li>
+        <li>Estudiar grafos de conocimiento y GraphRAG.</li>
+        <li>Revisar la documentación de OASIS y sus acciones.</li>
+        <li>Aprender fundamentos de APIs, Python y diseño experimental.</li>
+        <li>Investigar cómo validar hipótesis con datos reales.</li>
+      </ol>
+      <p style="margin-bottom:0;"><em>El nivel avanzado no consiste en ejecutar más agentes: consiste en formular mejores preguntas, controlar los supuestos y saber cuándo el resultado no permite concluir nada.</em></p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(13)">← Anterior: Glosario</button>
+      <button class="btn-nav-step next" onclick="go(15)">Siguiente: FUENTES →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 15: FUENTES ==================== -->
+  <section class="tab-panel" data-t="FUENTES Oficiales" id="sec-15">
+    <h2 class="section-title">13. Fuentes, documentación y enlaces</h2>
+
+    <div class="card">
+      <p><strong>Fecha de consulta: 22/11/2026.</strong> Las fuentes primarias aparecen primero. Los enlaces a archivos del repositorio corresponden a la rama <code class="inline-code">main</code> consultada y pueden cambiar.</p>
+      <div id="sources-list-container"></div>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(14)">← Anterior: Checklist</button>
+      <button class="btn-nav-step next" onclick="go(16)">Siguiente: CRÉDITOS →</button>
+    </div>
+  </section>
+
+  <!-- ==================== PESTAÑA 16: CRÉDITOS ==================== -->
+  <section class="tab-panel" data-t="CRÉDITOS" id="sec-16">
+    <h2 class="section-title">14. CRÉDITOS</h2>
+
+    <!-- SVG ANIMADO COMPARTIDO DESDE LA MISMA PLANTILLA -->
+    <div class="svg-stage-wrapper" id="credits-svg-container"></div>
+    <p class="svg-caption">Ilustración vectorial animada del motor de inteligencia de enjambre MiroFish (Zep GraphRAG + OASIS Social Agents).</p>
+
+    <div class="author-spotlight">
+      <div class="author-name-hero">Rubén Sbarsky</div>
+      <p style="font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:10px;">Autor del tutorial.</p>
+      <p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:8px;">Tutorial autodidacta sobre MiroFish para personas no técnicas en Windows 11, elaborado bajo estándares de calidad editorial, fidelidad técnica documental y diseño responsivo.</p>
+      <p style="font-weight:700;color:var(--accent);margin-bottom:6px;">Fecha y hora de creación: 22/11/2026 — 14:00:05</p>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0;">Versión del entregable: <strong>V002</strong> (<code class="inline-code">tutorial_MiroFish_Windows11_V002.html</code>)</p>
+    </div>
+
+    <div class="tab-footer-nav">
+      <button class="btn-nav-step" onclick="go(15)">← Anterior: FUENTES</button>
+      <button class="btn-nav-step next" onclick="go(0)">Volver a Inicio ⌂</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- BOTONES FLOTANTES ARRASTRABLES -->
+<button class="floating-draggable" id="float-home" aria-label="Ir a la pestaña Inicio" title="Arrastrar o pulsar para ir a Inicio">⌂ INICIO</button>
+<button class="floating-draggable" id="float-top" aria-label="Subir al comienzo de la pestaña actual" title="Arrastrar o pulsar para subir arriba">↑ ARRIBA</button>
+
+<div id="toast-msg" role="status" aria-live="polite"></div>
+
+<script>
+(function() {
+  "use strict";
+
+  /* ==================== DATOS DE LAS 35 FUENTES OFICIALES ==================== */
+  const SOURCES_DATA = [
+    { n: 1, t: "Repositorio oficial MiroFish", u: "https://github.com/666ghj/MiroFish", d: "Fuente principal para descripción, flujo, requisitos, comandos, URLs locales y despliegue Docker. Documentación oficial." },
+    { n: 2, t: "README.md", u: "https://github.com/666ghj/MiroFish/blob/main/README.md", d: "Verificación de arquitectura general, cinco etapas, Node.js 18+, Python 3.11–3.12, uv, variables requeridas, comandos de instalación y arranque. Documentación oficial." },
+    { n: 3, t: "package.json", u: "https://github.com/666ghj/MiroFish/blob/main/package.json", d: "Verificación de scripts setup, setup:backend, setup:all, dev, backend, frontend y requisito Node >=18. Archivo oficial de configuración." },
+    { n: 4, t: "backend/pyproject.toml", u: "https://github.com/666ghj/MiroFish/blob/main/backend/pyproject.toml", d: "Verificación del rango Python >=3.11,<3.13 y dependencias zep-cloud, camel-oasis y camel-ai. Archivo oficial de configuración." },
+    { n: 5, t: ".env.example", u: "https://github.com/666ghj/MiroFish/blob/main/.env.example", d: "Verificación de variables LLM_API_KEY, LLM_BASE_URL, LLM_MODEL_NAME, ZEP_API_KEY y variables opcionales de aceleración. Archivo oficial." },
+    { n: 6, t: ".gitignore", u: "https://github.com/666ghj/MiroFish/blob/main/.gitignore", d: "Verificación de exclusión de .env, entornos virtuales, dependencias, cargas y registros. Archivo oficial." },
+    { n: 7, t: "backend/app/config.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/config.py", d: "Verificación de límite de carga de 50 MB, extensiones admitidas, carga de .env, valores por defecto y validación de claves. Código oficial." },
+    { n: 8, t: "backend/run.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/run.py", d: "Verificación de arranque del backend, host por defecto y puerto 5001. Código oficial." },
+    { n: 9, t: "backend/app/services/graph_builder.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/services/graph_builder.py", d: "Verificación de construcción del grafo con Zep, fragmentación de texto y procesamiento por lotes. Código oficial." },
+    { n: 10, t: "backend/app/services/oasis_profile_generator.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/services/oasis_profile_generator.py", d: "Verificación de generación de perfiles de agentes a partir de entidades del grafo. Código oficial." },
+    { n: 11, t: "backend/app/services/simulation_manager.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/services/simulation_manager.py", d: "Verificación de gestión de simulaciones, plataformas Twitter/Reddit y estados. Código oficial." },
+    { n: 12, t: "backend/app/services/simulation_runner.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/services/simulation_runner.py", d: "Verificación del seguimiento de rondas, acciones y estados de ejecución. Código oficial." },
+    { n: 13, t: "backend/app/services/report_agent.py", u: "https://github.com/666ghj/MiroFish/blob/main/backend/app/services/report_agent.py", d: "Verificación del componente ReportAgent y generación del informe. Código oficial." },
+    { n: 14, t: "frontend/src/views/MainView.vue", u: "https://github.com/666ghj/MiroFish/blob/main/frontend/src/views/MainView.vue", d: "Verificación del flujo de cinco pasos y navegación de la interfaz. Código oficial." },
+    { n: 15, t: "frontend/src/components/Step2EnvSetup.vue", u: "https://github.com/666ghj/MiroFish/blob/main/frontend/src/components/Step2EnvSetup.vue", d: "Verificación de inicialización, generación de perfiles y configuración del entorno. Código oficial." },
+    { n: 16, t: "frontend/src/views/SimulationRunView.vue", u: "https://github.com/666ghj/MiroFish/blob/main/frontend/src/views/SimulationRunView.vue", d: "Verificación de la vista de ejecución y conexión con el componente de simulación. Código oficial." },
+    { n: 17, t: "docker-compose.yml", u: "https://github.com/666ghj/MiroFish/blob/main/docker-compose.yml", d: "Verificación de imagen, puertos, archivo .env y volumen de cargas. Archivo oficial." },
+    { n: 18, t: "LICENSE", u: "https://github.com/666ghj/MiroFish/blob/main/LICENSE", d: "Verificación de licencia AGPL-3.0. Fuente oficial." },
+    { n: 19, t: "Node.js — descarga", u: "https://nodejs.org/en/download/", d: "Descarga oficial y opciones LTS para Windows." },
+    { n: 20, t: "Python 3.12.10 — descarga", u: "https://www.python.org/downloads/release/python-31210/", d: "Instalador oficial de Python 3.12 para Windows." },
+    { n: 21, t: "Python 3.12 — uso en Windows", u: "https://docs.python.org/3.12/using/windows.html", d: "Información oficial sobre instalación y uso de Python en Windows." },
+    { n: 22, t: "uv — instalación", u: "https://docs.astral.sh/uv/getting-started/installation/", d: "Método de instalación oficial de uv en Windows PowerShell." },
+    { n: 23, t: "Git for Windows — instalación", u: "https://git-scm.com/install/windows", d: "Descarga oficial y opciones de instalación." },
+    { n: 24, t: "Docker Desktop — instalación en Windows", u: "https://docs.docker.com/desktop/setup/install/windows-install/", d: "Requisitos, WSL 2, modos de instalación y configuración de Docker Desktop." },
+    { n: 25, t: "Microsoft — instalación de WSL", u: "https://learn.microsoft.com/windows/wsl/install", d: "Instalación y configuración de WSL en Windows." },
+    { n: 26, t: "Alibaba Cloud Model Studio / Bailian", u: "https://bailian.console.aliyun.com/", d: "Consola oficial enlazada por el README para obtener acceso a modelos Qwen." },
+    { n: 27, t: "Alibaba Cloud — compatibilidad OpenAI", u: "https://www.alibabacloud.com/help/es/model-studio/compatibility-of-openai-with-dashscope", d: "Verificación de compatibilidad de API, URL base y configuración del modelo." },
+    { n: 28, t: "Zep Cloud — acceso", u: "https://app.getzep.com/", d: "Portal de cuenta y gestión de acceso a Zep." },
+    { n: 29, t: "Zep — documentación", u: "https://help.getzep.com/", d: "Documentación oficial del servicio." },
+    { n: 30, t: "Zep — precios", u: "https://www.getzep.com/pricing/", d: "Consulta de planes y créditos publicada el 22/11/2026. Los precios y condiciones pueden cambiar." },
+    { n: 31, t: "OASIS — repositorio oficial", u: "https://github.com/camel-ai/oasis", d: "Verificación de su función como simulador social multiagente y de su relación con CAMEL-AI." },
+    { n: 32, t: "OASIS — documentación", u: "https://docs.oasis.camel-ai.org/", d: "Documentación de entorno, plataformas, agentes y simulación." },
+    { n: 33, t: "OASIS — agentes sociales", u: "https://github.com/camel-ai/oasis/blob/main/docs/key_modules/social_agent.mdx", d: "Descripción oficial de SocialAgent." },
+    { n: 34, t: "OASIS — plataformas", u: "https://github.com/camel-ai/oasis/blob/main/docs/key_modules/platform.mdx", d: "Documentación oficial de plataformas simuladas tipo Twitter y Reddit." },
+    { n: 35, t: "OASIS — entorno", u: "https://github.com/camel-ai/oasis/blob/main/docs/key_modules/environments.mdx", d: "Configuración del entorno y ciclo de vida de una simulación." }
+  ];
+
+  /* ==================== UTILIDADES DE PERSISTENCIA Y NOTIFICACIONES ==================== */
+  function safeStorageGet(key, fallback) {
+    try {
+      const val = localStorage.getItem(key);
+      return val !== null ? val : fallback;
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function safeStorageSet(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      /* Ignorar si el almacenamiento local está restringido */
+    }
+  }
+
+  let toastTimer = null;
+  function showToast(message) {
+    const toast = document.getElementById("toast-msg");
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+  }
+
+  /* ==================== MONTAJE DE LOGOTIPO Y SVG HERO ÚNICO ==================== */
+  let heroTemplateMarkup = "";
+  let logoTemplateMarkup = "";
+
+  function extractAndRemoveTemplates() {
+    const tplHero = document.getElementById("tpl-hero-svg");
+    if (tplHero) {
+      heroTemplateMarkup = tplHero.innerHTML.trim();
+      tplHero.remove();
+    }
+    const tplLogo = document.getElementById("tpl-brand-logo");
+    if (tplLogo) {
+      logoTemplateMarkup = tplLogo.innerHTML.trim();
+      tplLogo.remove();
+    }
+  }
+
+  function createUniqueSvgMarkup(rawSvg, suffix) {
+    return rawSvg
+      .replace(/id="([^"]+)"/g, 'id="$1-' + suffix + '"')
+      .replace(/url\(#([^)]+)\)/g, 'url(#$1-' + suffix + ')');
+  }
+
+  function mountLogoInstances() {
+    const navSlot = document.getElementById("nav-logo-slot");
+    const heroSlot = document.getElementById("hero-logo-slot");
+    if (navSlot && !navSlot.innerHTML.trim()) {
+      navSlot.innerHTML = createUniqueSvgMarkup(logoTemplateMarkup, "nav");
+    }
+    if (heroSlot && !heroSlot.innerHTML.trim()) {
+      heroSlot.innerHTML = createUniqueSvgMarkup(logoTemplateMarkup, "hero");
+    }
+  }
+
+  function mountHeroSvgInstance(containerId, suffix) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!container.querySelector("svg")) {
+      try {
+        container.innerHTML = createUniqueSvgMarkup(heroTemplateMarkup, suffix);
+      } catch (err) {
+        const encoded = encodeURIComponent(createUniqueSvgMarkup(heroTemplateMarkup, suffix));
+        container.innerHTML = '<img src="data:image/svg+xml;utf8,' + encoded + '" alt="Ilustración MiroFish" style="width:100%;height:100%;object-fit:contain;">';
+      }
+    }
+  }
+
+  function ensureVisibleSvgsMounted() {
+    mountHeroSvgInstance("hero-svg-container", "inicio");
+    mountHeroSvgInstance("credits-svg-container", "creditos");
+  }
+
+  /* ==================== RENDERIZADO DE FUENTES ==================== */
+  function renderSourcesList() {
+    const container = document.getElementById("sources-list-container");
+    if (!container) return;
+    const html = SOURCES_DATA.map(src => `
+      <div class="url-card">
+        <div class="url-info">
+          <div class="url-title">${src.n}. ${src.t}</div>
+          <div class="url-raw">${src.u}</div>
+          <div class="url-desc">${src.d}</div>
+        </div>
+        <div class="url-actions">
+          <button class="btn-copy" data-copy="${src.u}">COPIAR URL</button>
+          <a href="${src.u}" target="_blank" rel="noopener noreferrer" class="btn-link-new">Abrir enlace en nueva ventana ↗</a>
+        </div>
+      </div>
+    `).join("");
+    container.innerHTML = html;
+  }
+
+  /* ==================== NAVEGACIÓN DE PESTAÑAS E ÍNDICE LATERAL (#dr) ==================== */
+  const secs = Array.from(document.querySelectorAll("section.tab-panel"));
+  const chips = Array.from(document.querySelectorAll("#main-tab-nav .chip[data-tab]"));
+  const dr = document.getElementById("dr");
+  const mb = document.getElementById("mb");
+  let currentTabIndex = 0;
+
+  function toggleDrawer(forceState) {
+    const isOpen = typeof forceState === "boolean" ? forceState : !dr.classList.contains("o");
+    dr.classList.toggle("o", isOpen);
+    mb.setAttribute("aria-expanded", String(isOpen));
+  }
+
+  function buildDrawerIndex() {
+    dr.innerHTML = "";
+    secs.forEach((sec, i) => {
+      const link = document.createElement("a");
+      const titleText = sec.dataset.t || (sec.querySelector("h2") ? sec.querySelector("h2").textContent : "Sección " + i);
+      link.textContent = (i ? i + ". " : "") + titleText;
+      link.setAttribute("role", "button");
+      link.setAttribute("tabindex", "0");
+      link.addEventListener("click", () => {
+        go(i);
+        toggleDrawer(false);
+      });
+      link.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          go(i);
+          toggleDrawer(false);
+        }
+      });
+      dr.appendChild(link);
+    });
+  }
+
+  window.go = function(index) {
+    if (index < 0 || index >= secs.length) return;
+    currentTabIndex = index;
+
+    secs.forEach((sec, idx) => sec.classList.toggle("active", idx === index));
+    chips.forEach((chip, idx) => chip.classList.toggle("active", idx === index));
+    Array.from(dr.children).forEach((a, idx) => a.classList.toggle("on", idx === index));
+
+    if (chips[index]) {
+      chips[index].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+
+    ensureVisibleSvgsMounted();
+    safeStorageSet("mirofish_active_tab", String(index));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    updateReadingProgress();
+  };
+
+  /* ==================== CONTROLES DE PLEGADO / DESPLEGADO DE 33 Q&A ==================== */
+  function initQaControls() {
+    const btnExpand = document.getElementById("btn-expand-all-qa");
+    const btnCollapse = document.getElementById("btn-collapse-all-qa");
+    const allDetails = () => Array.from(document.querySelectorAll("#qa-accordion-container details.qa-item"));
+
+    // Por defecto todas plegadas
+    allDetails().forEach(d => d.removeAttribute("open"));
+
+    if (btnExpand) {
+      btnExpand.addEventListener("click", () => {
+        allDetails().forEach(d => d.setAttribute("open", ""));
+        showToast("Todas las 33 respuestas desplegadas");
+      });
+    }
+    if (btnCollapse) {
+      btnCollapse.addEventListener("click", () => {
+        allDetails().forEach(d => d.removeAttribute("open"));
+        showToast("Todas las 33 respuestas plegadas");
+      });
+    }
+  }
+
+  /* ==================== COPIAR AL PORTAPAPELES ==================== */
+  function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("✓ Copiado al portapapeles");
+      }).catch(() => fallbackExecCommandCopy(text));
+    } else {
+      fallbackExecCommandCopy(text);
+    }
+  }
+
+  function fallbackExecCommandCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      const ok = document.execCommand("copy");
+      showToast(ok ? "✓ Copiado al portapapeles" : "⚠ Selecciona y copia manualmente");
+    } catch (err) {
+      showToast("⚠ No se pudo copiar automáticamente");
+    }
+    document.body.removeChild(textarea);
+  }
+
+  document.addEventListener("click", (e) => {
+    const copyBtn = e.target.closest(".btn-copy");
+    if (copyBtn) {
+      const textToCopy = copyBtn.getAttribute("data-copy");
+      if (textToCopy !== null) {
+        copyTextToClipboard(textToCopy);
+      }
+    }
+  });
+
+  /* ==================== BUSCADOR INTERNO ==================== */
+  function initSearch() {
+    const toggleBtn = document.getElementById("btn-toggle-search");
+    const closeBtn = document.getElementById("btn-close-search");
+    const panel = document.getElementById("search-bar-panel");
+    const input = document.getElementById("search-input");
+    const resultsBox = document.getElementById("search-results");
+
+    toggleBtn.addEventListener("click", () => {
+      panel.classList.toggle("open");
+      if (panel.classList.contains("open")) input.focus();
+    });
+
+    closeBtn.addEventListener("click", () => {
+      panel.classList.remove("open");
+      resultsBox.innerHTML = "";
+    });
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      resultsBox.innerHTML = "";
+      if (q.length < 2) return;
+
+      const hits = [];
+      secs.forEach((sec, idx) => {
+        const title = sec.dataset.t || "Sección";
+        const blocks = sec.querySelectorAll("p, li, summary, td, pre");
+        blocks.forEach(block => {
+          const txt = block.textContent.trim();
+          const pos = txt.toLowerCase().indexOf(q);
+          if (pos !== -1 && hits.length < 25) {
+            const start = Math.max(0, pos - 40);
+            const snippet = (start > 0 ? "..." : "") + txt.slice(start, pos + 90) + "...";
+            hits.push({ idx, title, snippet, element: block });
+          }
+        });
+      });
+
+      if (hits.length === 0) {
+        resultsBox.innerHTML = '<div class="search-hit">No se encontraron coincidencias para "' + q.replace(/</g, "&lt;") + '"</div>';
+        return;
+      }
+
+      hits.forEach(hit => {
+        const div = document.createElement("div");
+        div.className = "search-hit";
+        div.innerHTML = '<strong>[' + hit.title + ']</strong> ' + hit.snippet.replace(/</g, "&lt;");
+        div.addEventListener("click", () => {
+          go(hit.idx);
+          const detailsParent = hit.element.closest("details");
+          if (detailsParent) detailsParent.setAttribute("open", "");
+          panel.classList.remove("open");
+          setTimeout(() => hit.element.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
+        });
+        resultsBox.appendChild(div);
+      });
+    });
+  }
+
+  /* ==================== CHECKLISTS PERSISTENTES ==================== */
+  function initChecklists() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][data-chk]');
+    checkboxes.forEach(chk => {
+      const id = "mirofish_chk_" + chk.dataset.chk;
+      const saved = safeStorageGet(id, "false") === "true";
+      chk.checked = saved;
+      chk.closest(".checklist-item").classList.toggle("checked", saved);
+
+      chk.addEventListener("change", () => {
+        safeStorageSet(id, String(chk.checked));
+        chk.closest(".checklist-item").classList.toggle("checked", chk.checked);
+      });
+    });
+  }
+
+  /* ==================== TAMAÑO DE FUENTE, TEMA E IMPRESIÓN ==================== */
+  function initAppearanceControls() {
+    let fontSize = parseInt(safeStorageGet("mirofish_font_size", "16"), 10);
+    if (isNaN(fontSize) || fontSize < 13 || fontSize > 22) fontSize = 16;
+    document.documentElement.style.setProperty("--font-size", fontSize + "px");
+
+    document.getElementById("btn-font-dec").addEventListener("click", () => {
+      fontSize = Math.max(13, fontSize - 1);
+      document.documentElement.style.setProperty("--font-size", fontSize + "px");
+      safeStorageSet("mirofish_font_size", String(fontSize));
+    });
+
+    document.getElementById("btn-font-inc").addEventListener("click", () => {
+      fontSize = Math.min(22, fontSize + 1);
+      document.documentElement.style.setProperty("--font-size", fontSize + "px");
+      safeStorageSet("mirofish_font_size", String(fontSize));
+    });
+
+    const isLight = safeStorageGet("mirofish_theme", "dark") === "light";
+    if (isLight) document.body.classList.add("light-theme");
+
+    document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+      document.body.classList.toggle("light-theme");
+      const currentTheme = document.body.classList.contains("light-theme") ? "light" : "dark";
+      safeStorageSet("mirofish_theme", currentTheme);
+    });
+
+    const pauseBtn = document.getElementById("btn-pause-hero");
+    if (pauseBtn) {
+      pauseBtn.addEventListener("click", () => {
+        document.body.classList.toggle("svg-paused");
+        const paused = document.body.classList.contains("svg-paused");
+        showToast(paused ? "Animación pausada" : "Animación reanudada");
+      });
+    }
+
+    // Preparación e impresión segura
+    let closedDetailsBeforePrint = [];
+    function prepareForPrint() {
+      ensureVisibleSvgsMounted();
+      closedDetailsBeforePrint = [];
+      document.querySelectorAll("details.qa-item").forEach(d => {
+        if (!d.hasAttribute("open")) {
+          closedDetailsBeforePrint.push(d);
+          d.setAttribute("open", "");
+        }
+      });
+    }
+
+    function restoreAfterPrint() {
+      closedDetailsBeforePrint.forEach(d => d.removeAttribute("open"));
+      closedDetailsBeforePrint = [];
+    }
+
+    window.addEventListener("beforeprint", prepareForPrint);
+    window.addEventListener("afterprint", restoreAfterPrint);
+
+    document.getElementById("btn-print-pdf").addEventListener("click", () => {
+      prepareForPrint();
+      try {
+        window.print();
+      } catch (err) {
+        showToast("Abre este archivo directamente en el navegador y utiliza Ctrl+P o Cmd+P");
+      }
+    });
+  }
+
+  /* ==================== BOTONES FLOTANTES ARRASTRABLES (INICIO Y ARRIBA) ==================== */
+  function makeDraggableButton(btnId, onClickAction) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    let isDragging = false;
+    let hasMoved = false;
+    let startX = 0;
+    let startY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+
+    function onPointerDown(e) {
+      isDragging = true;
+      hasMoved = false;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      startX = clientX;
+      startY = clientY;
+      const rect = btn.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+      btn.style.right = "auto";
+      btn.style.bottom = "auto";
+      btn.style.left = initialLeft + "px";
+      btn.style.top = initialTop + "px";
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const dx = clientX - startX;
+      const dy = clientY - startY;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        hasMoved = true;
+      }
+      if (hasMoved) {
+        const maxX = window.innerWidth - btn.offsetWidth - 6;
+        const maxY = window.innerHeight - btn.offsetHeight - 6;
+        const nextX = Math.min(Math.max(6, initialLeft + dx), maxX);
+        const nextY = Math.min(Math.max(60, initialTop + dy), maxY);
+        btn.style.left = nextX + "px";
+        btn.style.top = nextY + "px";
+      }
+    }
+
+    function onPointerUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      if (!hasMoved) {
+        onClickAction();
+      }
+    }
+
+    btn.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup", onPointerUp);
+
+    btn.addEventListener("touchstart", onPointerDown, { passive: true });
+    window.addEventListener("touchmove", onPointerMove, { passive: true });
+    window.addEventListener("touchend", onPointerUp);
+  }
+
+  /* ==================== PROGRESO DE LECTURA ==================== */
+  function updateReadingProgress() {
+    const bar = document.getElementById("reading-progress");
+    if (!bar) return;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 100;
+    bar.style.width = pct + "%";
+  }
+
+  /* ==================== INICIALIZACIÓN GENERAL ==================== */
+  document.addEventListener("DOMContentLoaded", () => {
+    extractAndRemoveTemplates();
+    mountLogoInstances();
+    renderSourcesList();
+    buildDrawerIndex();
+    initQaControls();
+    initSearch();
+    initChecklists();
+    initAppearanceControls();
+
+    // Eventos de pestañas y menú sándwich
+    chips.forEach((chip, i) => {
+      chip.addEventListener("click", () => go(i));
+    });
+
+    mb.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleDrawer();
+    });
+
+    const ixBtn = document.getElementById("ix");
+    if (ixBtn) {
+      ixBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleDrawer(true);
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") toggleDrawer(false);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#dr, #mb, #ix")) {
+        toggleDrawer(false);
+      }
+    });
+
+    // Botones flotantes arrastrables
+    makeDraggableButton("float-home", () => go(0));
+    makeDraggableButton("float-top", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+    // Restaurar última pestaña o iniciar en 0
+    const savedTab = parseInt(safeStorageGet("mirofish_active_tab", "0"), 10);
+    go(!isNaN(savedTab) && savedTab >= 0 && savedTab < secs.length ? savedTab : 0);
+
+    // Vigilancia periódica de contenedores SVG
+    setInterval(ensureVisibleSvgsMounted, 2500);
+    window.addEventListener("scroll", updateReadingProgress, { passive: true });
+  });
+})();
+</script>
+</body>
+</html>
